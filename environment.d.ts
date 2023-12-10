@@ -15,7 +15,6 @@ declare global {
             VERCEL_GIT_COMMIT_MESSAGE?: string
             VERCEL_GIT_COMMIT_AUTHOR_LOGIN?: string
             VERCEL_GIT_COMMIT_AUTHOR_NAME?: string
-            PRODUCTION_URL?: string
         }
     }
 }
