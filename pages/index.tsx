@@ -187,8 +187,8 @@ export default function Index() {
                                     position: 'absolute',
                                     left: '-220px',
                                     right: '-220px',
-                                    bottom: 0,
-                                    top: 0,
+                                    bottom: '-5px',
+                                    top: '-1px',
                                     background: 'linear-gradient(90deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 40%),linear-gradient(0deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 40%)',
                                 },
                                 '&:is(:root[data-joy-color-scheme="dark"] &)::after': {
@@ -258,7 +258,7 @@ export default function Index() {
                 width: '100%',
                 backgroundColor: "#f7f9ff",
                 '&:is(:root[data-joy-color-scheme="dark"] &)': {
-                    backgroundColor: "#050505"
+                    backgroundColor: "#090909"
                 }
             }}>
                 <Container maxWidth="lg" sx={{
