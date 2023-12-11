@@ -6,7 +6,6 @@ function Document() {
     return (
         <Html data-color-scheme="light">
             <Head>
-                <meta name="viewport" content="initial-scale=1, width=device-width" />
                 <script
                     async
                     src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`}
@@ -18,7 +17,7 @@ function Document() {
                 />
             </Head>
             <body>
-                {getInitColorSchemeScript()}
+                {getInitColorSchemeScript({ defaultMode: 'system' })}
                 <Main />
                 <NextScript />
             </body>

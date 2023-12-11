@@ -8,6 +8,9 @@ const nextConfig = {
     modularizeImports: {
         '@mui/joy': {
             transform: '@mui/joy/{{member}}'
+        },
+        '@mui/icons-material/?(((\\w*)?/?)*)': {
+            transform: '@mui/icons-material/{{ matches.[1] }}/{{member}}'
         }
     }
 };

@@ -1,0 +1,14 @@
+User-agent: *
+Disallow: /_logs
+Disallow: /_logs/
+Disallow: /_src
+Disallow: /_src/
+
+User-agent: Twitterbot
+Disallow: /_logs
+Disallow: /_logs/
+Disallow: /_src
+Disallow: /_src/
+
+User-agent: nsa
+Disallow: /
