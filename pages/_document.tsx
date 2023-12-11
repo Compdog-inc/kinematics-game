@@ -4,7 +4,7 @@ import { GA_TRACKING_ID } from "../utils/gtag";
 
 function Document() {
     return (
-        <Html data-color-scheme="light">
+        <Html data-color-scheme="system">
             <Head>
                 <script
                     async
