@@ -170,9 +170,6 @@ export default function GameWidget(props: { drag?: boolean }) {
                     scrnRight = state.current.bounds.right * aspectScreen;
                 }
 
-                const wx = dx / ctx.canvas.width * (scrnRight - scrnLeft);
-                const wy = (1 - dy / ctx.canvas.height) * (scrnTop - scrnBottom);
-
                 const wdx = dx / (ctx.canvas.width / (scrnRight - scrnLeft)) / Math.max(1, aspectScreen);
                 const wdy = dy / (ctx.canvas.height / -(scrnTop - scrnBottom)) * Math.min(1, aspectScreen);
 
