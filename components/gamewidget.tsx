@@ -91,12 +91,6 @@ export default function GameWidget(props: { drag?: boolean }) {
             ctx.strokeStyle = state.current.theme === 'dark' ? '#42434d' : '#86869e';
             ctx.lineWidth = 4;
             ctx.stroke();
-
-            const wx = state.current.startMx / ctx.canvas.width * (scrnRight - scrnLeft) + scrnLeft;
-            const wy = (1 - state.current.startMy / ctx.canvas.height) * (scrnTop - scrnBottom) + scrnBottom;
-            const px = worldToPx(wx, wy);
-            ctx.fillStyle = 'red';
-            ctx.fillRect(px.x, px.y, 10, 10);
         }
     }, [state]);
 
