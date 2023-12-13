@@ -8,11 +8,13 @@ export default function Sandbox() {
             <Head>
                 <title>Pixel Perfect Kinematics | Sandbox</title>
             </Head>
-            <Box sx={{
-                width: '100vw',
-                height: 'calc(100vh - 60px)'
-            }}>
-                <GameWidget drag />
+            <Box sx={{ overflow: 'hidden' }}>
+                <Box sx={{
+                    width: '100vw',
+                    height: 'calc(100vh - 60px)'
+                }}>
+                    <GameWidget drag />
+                </Box>
             </Box>
         </>
     )

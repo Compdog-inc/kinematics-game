@@ -24,12 +24,7 @@ export default function GameWidget(props: { drag?: boolean }) {
         }
     });
 
-    useEffect(() => {
-        state.current.theme = mode === 'system' ? systemMode : mode;
-        requestAnimationFrame(render);
-    }, [mode, systemMode]);
-
-    const render = React.useCallback((_: number) => {
+    const render = React.useCallback(() => {
         if (state.current.ctx) {
             const ctx = state.current.ctx;
 
@@ -81,10 +76,10 @@ export default function GameWidget(props: { drag?: boolean }) {
             };
 
             // draw grid @x1
-            drawGrid(1, '#28272e');
+            drawGrid(1, state.current.theme === 'dark' ? '#28272e' : '#d5d5eb');
 
             // draw grid @x2
-            drawGrid(0.5, '#212126');
+            drawGrid(0.5, state.current.theme === 'dark' ? '#212126' : '#ebebfa');
 
             // draw axis
             ctx.beginPath();
@@ -93,7 +88,7 @@ export default function GameWidget(props: { drag?: boolean }) {
             ctx.lineTo(ax0.x, ctx.canvas.height);
             ctx.moveTo(0, ax0.y);
             ctx.lineTo(ctx.canvas.width, ax0.y);
-            ctx.strokeStyle = '#42434d';
+            ctx.strokeStyle = state.current.theme === 'dark' ? '#42434d' : '#86869e';
             ctx.lineWidth = 2;
             ctx.stroke();
 
@@ -105,6 +100,11 @@ export default function GameWidget(props: { drag?: boolean }) {
         }
     }, [state]);
 
+    useEffect(() => {
+        state.current.theme = mode === 'system' ? systemMode : mode;
+        render();
+    }, [mode, systemMode, render]);
+
     React.useEffect(() => {
         state.current.ctx = canvasElem.current?.getContext('2d') || null;
         if (state.current.resizeObserver) {
@@ -113,23 +113,23 @@ export default function GameWidget(props: { drag?: boolean }) {
         state.current.resizeObserver = new ResizeObserver(() => {
             if (state.current.ctx) {
                 state.current.ctx.canvas.width =
-                    state.current.ctx.canvas.offsetWidth;
+                    state.current.ctx.canvas.offsetWidth * 2;
                 state.current.ctx.canvas.height =
-                    state.current.ctx.canvas.offsetHeight;
-                render(0);
+                    state.current.ctx.canvas.offsetHeight * 2;
+                render();
             }
         });
         if (canvasElem.current) {
             state.current.resizeObserver.observe(canvasElem.current);
         }
-        requestAnimationFrame(render);
+        render();
     }, [canvasElem, state, render]);
 
     const pointerDown = React.useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
         e.preventDefault();
         state.current.drag = true;
-        state.current.startMx = e.clientX;
-        state.current.startMy = e.clientY;
+        state.current.startMx = e.clientX * 2;
+        state.current.startMy = e.clientY * 2;
         state.current.startDragX = state.current.bounds.left;
         state.current.startDragY = state.current.bounds.bottom;
     }, [state]);
@@ -143,8 +143,8 @@ export default function GameWidget(props: { drag?: boolean }) {
         if (state.current.drag) {
             e.preventDefault();
 
-            const dx = e.clientX - state.current.startMx;
-            const dy = e.clientY - state.current.startMy;
+            const dx = e.clientX * 2 - state.current.startMx;
+            const dy = e.clientY * 2 - state.current.startMy;
 
             if (state.current.ctx) {
                 const ctx = state.current.ctx;
@@ -183,9 +183,9 @@ export default function GameWidget(props: { drag?: boolean }) {
                 }
             }
 
-            requestAnimationFrame(render);
+            render();
         }
-    }, [state, props.drag]);
+    }, [state, props.drag, render]);
 
     return (
         <Box className={styles.container}>
