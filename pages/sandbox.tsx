@@ -12,7 +12,7 @@ export default function Sandbox() {
                 width: '100vw',
                 height: 'calc(100vh - 60px)'
             }}>
-                <GameWidget />
+                <GameWidget drag />
             </Box>
         </>
     )
