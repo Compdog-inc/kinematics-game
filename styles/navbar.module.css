@@ -6,6 +6,7 @@
     backdrop-filter: blur(8px);
     box-shadow: inset 0px -1px 1px var(--joy-palette-neutral-100);
     background-color: rgba(255, 255, 255, 0.8);
+    width: 100vw;
 }
 
 :where([data-joy-color-scheme="dark"]) .header {
