@@ -70,16 +70,16 @@ export default function GameWidget(props: { drag?: boolean }) {
                     ctx.moveTo(0, py);
                     ctx.lineTo(ctx.canvas.width, py);
                 }
-                ctx.lineWidth = 2 * scale;
+                ctx.lineWidth = 4 * scale;
                 ctx.strokeStyle = color;
                 ctx.stroke();
             };
 
-            // draw grid @x1
-            drawGrid(1, state.current.theme === 'dark' ? '#28272e' : '#d5d5eb');
-
             // draw grid @x2
             drawGrid(0.5, state.current.theme === 'dark' ? '#212126' : '#ebebfa');
+
+            // draw grid @x1
+            drawGrid(1, state.current.theme === 'dark' ? '#28272e' : '#d5d5eb');
 
             // draw axis
             ctx.beginPath();
@@ -89,7 +89,7 @@ export default function GameWidget(props: { drag?: boolean }) {
             ctx.moveTo(0, ax0.y);
             ctx.lineTo(ctx.canvas.width, ax0.y);
             ctx.strokeStyle = state.current.theme === 'dark' ? '#42434d' : '#86869e';
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 4;
             ctx.stroke();
 
             const wx = state.current.startMx / ctx.canvas.width * (scrnRight - scrnLeft) + scrnLeft;
@@ -127,9 +127,10 @@ export default function GameWidget(props: { drag?: boolean }) {
 
     const pointerDown = React.useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
         e.preventDefault();
+        const bounds = e.currentTarget.getBoundingClientRect();
         state.current.drag = true;
-        state.current.startMx = e.clientX * 2;
-        state.current.startMy = e.clientY * 2;
+        state.current.startMx = (e.clientX - bounds.left) * 2;
+        state.current.startMy = (e.clientY - bounds.top) * 2;
         state.current.startDragX = state.current.bounds.left;
         state.current.startDragY = state.current.bounds.bottom;
     }, [state]);
@@ -142,9 +143,9 @@ export default function GameWidget(props: { drag?: boolean }) {
     const pointerMove = React.useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
         if (state.current.drag) {
             e.preventDefault();
-
-            const dx = e.clientX * 2 - state.current.startMx;
-            const dy = e.clientY * 2 - state.current.startMy;
+            const bounds = e.currentTarget.getBoundingClientRect();
+            const dx = (e.clientX - bounds.left) * 2 - state.current.startMx;
+            const dy = (e.clientY - bounds.top) * 2 - state.current.startMy;
 
             if (state.current.ctx) {
                 const ctx = state.current.ctx;
@@ -169,10 +170,13 @@ export default function GameWidget(props: { drag?: boolean }) {
                     scrnRight = state.current.bounds.right * aspectScreen;
                 }
 
-                const wdx = dx / (Math.max(ctx.canvas.height, ctx.canvas.width) / (scrnRight - scrnLeft));
-                const wdy = dy / (Math.min(ctx.canvas.height, ctx.canvas.width) / -(scrnTop - scrnBottom));
+                const wx = dx / ctx.canvas.width * (scrnRight - scrnLeft);
+                const wy = (1 - dy / ctx.canvas.height) * (scrnTop - scrnBottom);
 
-                if (props.drag && false) {
+                const wdx = dx / (ctx.canvas.width / (scrnRight - scrnLeft)) / Math.max(1, aspectScreen);
+                const wdy = dy / (ctx.canvas.height / -(scrnTop - scrnBottom)) * Math.min(1, aspectScreen);
+
+                if (props.drag) {
                     // move viewport with dragging
                     const w = state.current.bounds.right - state.current.bounds.left;
                     const h = state.current.bounds.top - state.current.bounds.bottom;
