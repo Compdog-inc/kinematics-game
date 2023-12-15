@@ -69,7 +69,7 @@ export default function Sandbox() {
                             <Tooltip title={
                                 <>
                                     Drag and drop nodes to add them to the sandbox, <br />
-                                    or click the '+' icon to toggle add-on-click functionallity.
+                                    or click the &#39;+&#39; icon to toggle add-on-click functionallity.
                                 </>
                             } arrow placement="right" variant="outlined">
                                 <IconButton variant="plain" sx={{
