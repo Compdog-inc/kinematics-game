@@ -1,0 +1,11 @@
+.card {
+    width: 100%;
+    touch-action: none;
+    position: relative;
+    transform: translate(0);
+}
+
+.card,
+.card * {
+    user-select: none;
+}

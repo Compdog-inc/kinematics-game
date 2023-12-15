@@ -4,7 +4,11 @@ import styles from '../styles/gamewidget.module.css';
 import React, { useEffect } from "react";
 import { useColorScheme } from "@mui/joy/styles";
 
-export default function GameWidget(props: { drag?: boolean }) {
+export default function GameWidget(props: {
+    drag?: boolean,
+    onDragOver?: React.DragEventHandler<HTMLCanvasElement>
+    onDrop?: React.DragEventHandler<HTMLCanvasElement>
+}) {
     const canvasElem = React.useRef(null as HTMLCanvasElement | null);
     const { mode, systemMode } = useColorScheme();
     const state = React.useRef({
@@ -184,7 +188,7 @@ export default function GameWidget(props: { drag?: boolean }) {
 
     return (
         <Box className={styles.container}>
-            <canvas ref={canvasElem} onPointerDown={pointerDown} onPointerUp={pointerUp} onPointerMove={pointerMove}>
+            <canvas onDragOver={props.onDragOver} onDrop={props.onDrop} ref={canvasElem} onPointerDown={pointerDown} onPointerUp={pointerUp} onPointerMove={pointerMove}>
                 <Typography level="body-lg">
                     Error loading canvas
                 </Typography>

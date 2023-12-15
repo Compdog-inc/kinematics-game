@@ -9,18 +9,16 @@ import KeyboardDoubleArrowRightRounded from '@mui/icons-material/KeyboardDoubleA
 import styles from "../styles/sandbox.module.css";
 import classNames from "classnames";
 import List from "@mui/joy/List";
-import Card from "@mui/joy/Card";
 import Sheet from "@mui/joy/Sheet";
-import CardOverflow from "@mui/joy/CardOverflow";
-import AspectRatio from "@mui/joy/AspectRatio";
-import CardContent from "@mui/joy/CardContent";
-import Typography from "@mui/joy/Typography";
 import cardPlaceholderImg from "../images/placeholder_360x360.webp";
-import Image from "next/image";
 import ListItem from "@mui/joy/ListItem";
+import SandboxCard from "../components/sandbox-card";
+import HelpOutlineRounded from "@mui/icons-material/HelpOutlineRounded";
+import Tooltip from "@mui/joy/Tooltip";
 
 export default function Sandbox() {
     const [open, setOpen] = React.useState(true);
+    const [currentAdd, setCurrentAdd] = React.useState(-1);
 
     return (
         <>
@@ -32,7 +30,14 @@ export default function Sandbox() {
                     width: '100vw',
                     height: 'calc(100vh - 60px)'
                 }}>
-                    <GameWidget drag />
+                    <GameWidget drag
+                        onDragOver={(e) => {
+                            e.preventDefault();
+                            e.dataTransfer.dropEffect = "copy";
+                        }}
+                        onDrop={(e) => {
+                            e.preventDefault();
+                        }} />
                     <IconButton variant="plain" size="md" tabIndex={0} aria-label="Open drawer" onClick={() => setOpen(!open)} sx={{
                         position: 'fixed',
                         left: '5px',
@@ -61,6 +66,23 @@ export default function Sandbox() {
                         }
                     }}>
                         <Sheet sx={{ height: '46px' }}>
+                            <Tooltip title={
+                                <>
+                                    Drag and drop nodes to add them to the sandbox, <br />
+                                    or click the '+' icon to toggle add-on-click functionallity.
+                                </>
+                            } arrow placement="right" variant="outlined">
+                                <IconButton variant="plain" sx={{
+                                    position: 'fixed',
+                                    top: '5px',
+                                    left: '5px',
+                                    '&:hover': {
+                                        backgroundColor: 'transparent'
+                                    }
+                                }}>
+                                    <HelpOutlineRounded />
+                                </IconButton>
+                            </Tooltip>
                             <IconButton variant="plain" size="md" tabIndex={0} aria-label="Close drawer" onClick={() => setOpen(!open)} sx={{
                                 position: 'fixed',
                                 right: '5px',
@@ -71,43 +93,25 @@ export default function Sandbox() {
                         </Sheet>
                         <List role="list" size="lg" sx={{ mt: '-14px' }}>
                             <ListItem>
-                                <Card orientation="horizontal" variant="outlined" sx={{ width: '100%' }}>
-                                    <CardOverflow>
-                                        <AspectRatio ratio="1" sx={{ width: 100 }} flex>
-                                            <Image alt="" aria-hidden src={cardPlaceholderImg} placeholder="blur" />
-                                        </AspectRatio>
-                                    </CardOverflow>
-                                    <CardContent>
-                                        <Typography fontWeight="md">Fixed Node</Typography>
-                                        <Typography level="body-xs">A simple kinematics node with a fixed position. Used as the initial node in a model.</Typography>
-                                    </CardContent>
-                                </Card>
+                                <SandboxCard
+                                    addToggled={currentAdd === 0} onAddClick={() => setCurrentAdd(currentAdd === 0 ? -1 : 0)}
+                                    thumbnail={cardPlaceholderImg}
+                                    name="Fixed Node"
+                                    description="A simple kinematics node with a fixed position. Used as the initial node in a model." />
                             </ListItem>
                             <ListItem>
-                                <Card orientation="horizontal" variant="outlined" sx={{ width: '100%' }}>
-                                    <CardOverflow>
-                                        <AspectRatio ratio="1" sx={{ width: 100 }} flex>
-                                            <Image alt="" aria-hidden src={cardPlaceholderImg} placeholder="blur" />
-                                        </AspectRatio>
-                                    </CardOverflow>
-                                    <CardContent>
-                                        <Typography fontWeight="md">Rotating Node</Typography>
-                                        <Typography level="body-xs">A node that allows for the unconstrained rotation of all connected links.</Typography>
-                                    </CardContent>
-                                </Card>
+                                <SandboxCard
+                                    addToggled={currentAdd === 1} onAddClick={() => setCurrentAdd(currentAdd === 1 ? -1 : 1)}
+                                    thumbnail={cardPlaceholderImg}
+                                    name="Rotating Node"
+                                    description="A node that allows for the unconstrained rotation of all connected links." />
                             </ListItem>
                             <ListItem>
-                                <Card orientation="horizontal" variant="outlined" sx={{ width: '100%' }}>
-                                    <CardOverflow>
-                                        <AspectRatio ratio="1" sx={{ width: 100 }} flex>
-                                            <Image alt="" aria-hidden src={cardPlaceholderImg} placeholder="blur" />
-                                        </AspectRatio>
-                                    </CardOverflow>
-                                    <CardContent>
-                                        <Typography fontWeight="md">Translating Node</Typography>
-                                        <Typography level="body-xs">This node moves along an infinite linear track. Constrained, for eternity, to a life of 1d.</Typography>
-                                    </CardContent>
-                                </Card>
+                                <SandboxCard
+                                    addToggled={currentAdd === 2} onAddClick={() => setCurrentAdd(currentAdd === 2 ? -1 : 2)}
+                                    thumbnail={cardPlaceholderImg}
+                                    name="Translating Node"
+                                    description="This node moves along an infinite linear track. Constrained, for eternity, to a life of 1d." />
                             </ListItem>
                         </List>
                     </Drawer>
