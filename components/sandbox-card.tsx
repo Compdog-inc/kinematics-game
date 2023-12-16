@@ -34,10 +34,15 @@ export default function SandboxCard(props: {
     name: ReactNode,
     description: ReactNode,
     addToggled?: boolean,
-    onAddClick?: MouseEventHandler<HTMLButtonElement>
+    onAddClick?: MouseEventHandler<HTMLButtonElement>,
+    drop?: (s: string) => void,
+    id: string
 }) {
     return (<HoverCard orientation="horizontal" variant="outlined" className={styles.card} draggable onDragStart={(e) => {
-        e.dataTransfer.setData("text/plain", "0");
+        e.dataTransfer.setData("sandbox/node", props.id);
+        if (props.drop) {
+            props.drop(props.id);
+        }
         e.dataTransfer.dropEffect = "copy";
     }}>
         <CardOverflow>

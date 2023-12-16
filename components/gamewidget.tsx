@@ -4,19 +4,46 @@ import styles from '../styles/gamewidget.module.css';
 import React, { useEffect } from "react";
 import { useColorScheme } from "@mui/joy/styles";
 
-export default function GameWidget(props: {
+export interface HTMLGameWidget {
+    drag: boolean;
+    startMx: number;
+    startMy: number;
+    startDragX: number;
+    startDragY: number;
+    mx: number;
+    my: number;
+    useMp: boolean;
+    ctx: CanvasRenderingContext2D | null;
+    theme: 'light' | 'dark' | undefined;
+    resizeObserver: ResizeObserver | undefined;
+    bounds: {
+        left: number,
+        top: number,
+        right: number,
+        bottom: number
+    };
+    addOnClickId: number;
+    dropId: number;
+    render?: () => void;
+}
+
+export default function GameWidget({ drag, onDragOver, onDrop, stref }: {
     drag?: boolean,
     onDragOver?: React.DragEventHandler<HTMLCanvasElement>
-    onDrop?: React.DragEventHandler<HTMLCanvasElement>
+    onDrop?: React.DragEventHandler<HTMLCanvasElement>,
+    stref?: (o: HTMLGameWidget | null) => any | undefined
 }) {
     const canvasElem = React.useRef(null as HTMLCanvasElement | null);
     const { mode, systemMode } = useColorScheme();
-    const state = React.useRef({
+    const state = React.useRef<HTMLGameWidget>({
         drag: false,
         startMx: 0,
         startMy: 0,
         startDragX: 0,
         startDragY: 0,
+        mx: 0,
+        my: 0,
+        useMp: false,
         ctx: null as CanvasRenderingContext2D | null,
         theme: undefined as 'light' | 'dark' | undefined,
         resizeObserver: undefined as ResizeObserver | undefined,
@@ -25,7 +52,9 @@ export default function GameWidget(props: {
             top: 5,
             right: 5,
             bottom: -5
-        }
+        },
+        addOnClickId: -1,
+        dropId: -1
     });
 
     const render = React.useCallback(() => {
@@ -95,12 +124,26 @@ export default function GameWidget(props: {
             ctx.strokeStyle = state.current.theme === 'dark' ? '#42434d' : '#86869e';
             ctx.lineWidth = 4;
             ctx.stroke();
+
+            if (state.current.useMp) {
+                if (state.current.dropId !== -1) {
+                    ctx.fillStyle = ["red", "blue", "green", "magenta", "yellow", "orange", "teal"][state.current.dropId];
+                    ctx.fillRect(state.current.mx - 30, state.current.my - 30, 60, 60);
+                } else if (state.current.addOnClickId !== -1) {
+                    ctx.fillStyle = ["red", "blue", "green", "magenta", "yellow", "orange", "teal"][state.current.addOnClickId];
+                    ctx.fillRect(state.current.mx - 10, state.current.my - 10, 20, 20);
+                }
+            }
         }
     }, [state]);
 
     useEffect(() => {
+        state.current.render = render;
+    }, [render]);
+
+    useEffect(() => {
         state.current.theme = mode === 'system' ? systemMode : mode;
-        render();
+        requestAnimationFrame(render);
     }, [mode, systemMode, render]);
 
     React.useEffect(() => {
@@ -139,11 +182,15 @@ export default function GameWidget(props: {
     }, [state]);
 
     const pointerMove = React.useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
+        const bounds = e.currentTarget.getBoundingClientRect();
+        state.current.mx = (e.clientX - bounds.left) * 2;
+        state.current.my = (e.clientY - bounds.top) * 2;
+        state.current.useMp = true;
+
         if (state.current.drag) {
             e.preventDefault();
-            const bounds = e.currentTarget.getBoundingClientRect();
-            const dx = (e.clientX - bounds.left) * 2 - state.current.startMx;
-            const dy = (e.clientY - bounds.top) * 2 - state.current.startMy;
+            const dx = state.current.mx - state.current.startMx;
+            const dy = state.current.my - state.current.startMy;
 
             if (state.current.ctx) {
                 const ctx = state.current.ctx;
@@ -171,7 +218,7 @@ export default function GameWidget(props: {
                 const wdx = dx / (ctx.canvas.width / (scrnRight - scrnLeft)) / Math.max(1, aspectScreen);
                 const wdy = dy / (ctx.canvas.height / -(scrnTop - scrnBottom)) * Math.min(1, aspectScreen);
 
-                if (props.drag) {
+                if (drag) {
                     // move viewport with dragging
                     const w = state.current.bounds.right - state.current.bounds.left;
                     const h = state.current.bounds.top - state.current.bounds.bottom;
@@ -182,13 +229,32 @@ export default function GameWidget(props: {
                 }
             }
 
-            render();
+            requestAnimationFrame(render);
+        } else if (state.current.addOnClickId !== -1) {
+            requestAnimationFrame(render);
         }
-    }, [state, props.drag, render]);
+    }, [state, drag, render]);
+
+    const pointerLeave = React.useCallback((_: React.PointerEvent<HTMLCanvasElement>) => {
+        state.current.useMp = false;
+        requestAnimationFrame(render);
+    }, [state, render]);
+
+    useEffect(() => {
+        if (stref) {
+            stref(state.current);
+        }
+
+        return () => {
+            if (stref) {
+                stref(null);
+            }
+        }
+    }, [stref]);
 
     return (
         <Box className={styles.container}>
-            <canvas onDragOver={props.onDragOver} onDrop={props.onDrop} ref={canvasElem} onPointerDown={pointerDown} onPointerUp={pointerUp} onPointerMove={pointerMove}>
+            <canvas onDragOver={onDragOver} onDrop={onDrop} ref={canvasElem} onPointerDown={pointerDown} onPointerUp={pointerUp} onPointerMove={pointerMove} onPointerLeave={pointerLeave}>
                 <Typography level="body-lg">
                     Error loading canvas
                 </Typography>
