@@ -27,6 +27,52 @@ export interface HTMLGameWidget {
     render?: () => void;
 }
 
+export interface GameWidgetNode {
+    id: number;
+    x: number;
+    y: number;
+}
+
+export interface GameWidgetFixedNode extends GameWidgetNode {
+}
+
+export interface GameWidgetRotatingNode extends GameWidgetNode {
+    angle: number;
+}
+
+export interface GameWidgetTranslatingNode extends GameWidgetNode {
+    angle: number;
+    delta: number;
+}
+
+export interface GameWidgetClampedNode extends GameWidgetNode {
+    angle: number;
+    minAngle: number;
+    maxAngle: number;
+}
+
+export interface GameWidgetClampedTranslatingNode extends GameWidgetNode {
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+    delta: number;
+}
+
+export interface GameWidgetArcTranslatingNode extends GameWidgetNode {
+    cx: number;
+    cy: number;
+    minAngle: number;
+    maxAngle: number;
+    delta: number;
+}
+
+export interface GameWidgetPolygonalTranslatingNode extends GameWidgetNode {
+    px: number[];
+    py: number[];
+    delta: number;
+}
+
 export default function GameWidget({ drag, onDragOver, onDrop, stref }: {
     drag?: boolean,
     onDragOver?: React.DragEventHandler<HTMLCanvasElement>
