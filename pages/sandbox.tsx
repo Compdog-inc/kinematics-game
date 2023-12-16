@@ -1,5 +1,5 @@
 import Head from "next/head";
-import GameWidget, { HTMLGameWidget } from "../components/gamewidget";
+import GameWidget, { HTMLGameWidget, mapDefaultNode } from "../components/gamewidget";
 import Box from "@mui/joy/Box";
 import Drawer from "@mui/joy/Drawer";
 import IconButton from "@mui/joy/IconButton";
@@ -57,6 +57,11 @@ export default function Sandbox() {
     const gameDrop = React.useCallback((e: DragEvent<HTMLCanvasElement>) => {
         if (widget.current) {
             e.preventDefault();
+            widget.current.nodes.push(mapDefaultNode({
+                id: widget.current.dropId,
+                x: 1,
+                y: 1
+            }));
             widget.current.dropId = -1;
             if (widget.current.render)
                 requestAnimationFrame(widget.current.render);
@@ -145,7 +150,7 @@ export default function Sandbox() {
                                         addToggled={currentAdd === 1} onAddClick={() => setCurrentAdd(currentAdd === 1 ? -1 : 1)} drop={setDropTransfer}
                                         thumbnail={cardPlaceholderImg}
                                         name="Rotating Node"
-                                        description="A node that allows for the unconstrained rotation of all connected links." />
+                                        description="A node that allows for the unconstrained rotation of the connected link." />
                                 </ListItem>
                                 <ListItem>
                                     <SandboxCard id="2"

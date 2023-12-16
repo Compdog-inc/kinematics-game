@@ -4,29 +4,6 @@ import styles from '../styles/gamewidget.module.css';
 import React, { useEffect } from "react";
 import { useColorScheme } from "@mui/joy/styles";
 
-export interface HTMLGameWidget {
-    drag: boolean;
-    startMx: number;
-    startMy: number;
-    startDragX: number;
-    startDragY: number;
-    mx: number;
-    my: number;
-    useMp: boolean;
-    ctx: CanvasRenderingContext2D | null;
-    theme: 'light' | 'dark' | undefined;
-    resizeObserver: ResizeObserver | undefined;
-    bounds: {
-        left: number,
-        top: number,
-        right: number,
-        bottom: number
-    };
-    addOnClickId: number;
-    dropId: number;
-    render?: () => void;
-}
-
 export interface GameWidgetNode {
     id: number;
     x: number;
@@ -62,6 +39,7 @@ export interface GameWidgetClampedTranslatingNode extends GameWidgetNode {
 export interface GameWidgetArcTranslatingNode extends GameWidgetNode {
     cx: number;
     cy: number;
+    r: number;
     minAngle: number;
     maxAngle: number;
     delta: number;
@@ -72,6 +50,68 @@ export interface GameWidgetPolygonalTranslatingNode extends GameWidgetNode {
     py: number[];
     delta: number;
 }
+
+export interface HTMLGameWidget {
+    drag: boolean;
+    startMx: number;
+    startMy: number;
+    startDragX: number;
+    startDragY: number;
+    mx: number;
+    my: number;
+    useMp: boolean;
+    ctx: CanvasRenderingContext2D | null;
+    theme: 'light' | 'dark' | undefined;
+    resizeObserver: ResizeObserver | undefined;
+    bounds: {
+        left: number,
+        top: number,
+        right: number,
+        bottom: number
+    };
+    addOnClickId: number;
+    dropId: number;
+    render?: () => void;
+    nodes: GameWidgetNode[];
+}
+
+export const mapDefaultNode = (node: GameWidgetNode): GameWidgetNode => {
+    switch (node.id) {
+        case 1: // rotating node
+            (node as GameWidgetRotatingNode).angle = 0;
+            break;
+        case 2: // translating node
+            (node as GameWidgetTranslatingNode).angle = 0;
+            (node as GameWidgetTranslatingNode).delta = 0;
+            break;
+        case 3: // clamped node
+            (node as GameWidgetClampedNode).minAngle = 0;
+            (node as GameWidgetClampedNode).maxAngle = 90;
+            (node as GameWidgetClampedNode).angle = 0;
+            break;
+        case 4: // clamped translating node
+            (node as GameWidgetClampedTranslatingNode).x1 = node.x - 1;
+            (node as GameWidgetClampedTranslatingNode).y1 = node.y;
+            (node as GameWidgetClampedTranslatingNode).x2 = node.x + 1;
+            (node as GameWidgetClampedTranslatingNode).y2 = node.y;
+            (node as GameWidgetClampedTranslatingNode).delta = 0.5;
+            break;
+        case 5: // arc translating node
+            (node as GameWidgetArcTranslatingNode).r = 1;
+            (node as GameWidgetArcTranslatingNode).cx = node.x;
+            (node as GameWidgetArcTranslatingNode).cy = node.y - 1;
+            (node as GameWidgetArcTranslatingNode).minAngle = 0;
+            (node as GameWidgetArcTranslatingNode).maxAngle = 90;
+            (node as GameWidgetArcTranslatingNode).delta = 0;
+            break;
+        case 6: // polygonal translating node
+            (node as GameWidgetPolygonalTranslatingNode).px = [node.x - 1, node.x - .5, node.x, node.x + .5, node.x + 1];
+            (node as GameWidgetPolygonalTranslatingNode).py = [node.y, node.y - .6, node.y, node.y - .6, node.y];
+            (node as GameWidgetPolygonalTranslatingNode).delta = .5;
+            break;
+    }
+    return node;
+};
 
 export default function GameWidget({ drag, onDragOver, onDrop, stref }: {
     drag?: boolean,
@@ -100,7 +140,8 @@ export default function GameWidget({ drag, onDragOver, onDrop, stref }: {
             bottom: -5
         },
         addOnClickId: -1,
-        dropId: -1
+        dropId: -1,
+        nodes: []
     });
 
     const render = React.useCallback(() => {
@@ -225,7 +266,16 @@ export default function GameWidget({ drag, onDragOver, onDrop, stref }: {
     const pointerUp = React.useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
         e.preventDefault();
         state.current.drag = false;
-    }, [state]);
+
+        if (state.current.dropId === -1 && state.current.addOnClickId !== -1) {
+            state.current.nodes.push(mapDefaultNode({
+                id: state.current.addOnClickId,
+                x: 1,
+                y: 1
+            }));
+            requestAnimationFrame(render);
+        }
+    }, [state, render]);
 
     const pointerMove = React.useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
         const bounds = e.currentTarget.getBoundingClientRect();
@@ -286,6 +336,11 @@ export default function GameWidget({ drag, onDragOver, onDrop, stref }: {
         requestAnimationFrame(render);
     }, [state, render]);
 
+    const dragLeave = React.useCallback((_: React.DragEvent<HTMLCanvasElement>) => {
+        state.current.useMp = false;
+        requestAnimationFrame(render);
+    }, [state, render]);
+
     useEffect(() => {
         if (stref) {
             stref(state.current);
@@ -300,7 +355,7 @@ export default function GameWidget({ drag, onDragOver, onDrop, stref }: {
 
     return (
         <Box className={styles.container}>
-            <canvas onDragOver={onDragOver} onDrop={onDrop} ref={canvasElem} onPointerDown={pointerDown} onPointerUp={pointerUp} onPointerMove={pointerMove} onPointerLeave={pointerLeave}>
+            <canvas onDragOver={onDragOver} onDrop={onDrop} onDragLeave={dragLeave} ref={canvasElem} onPointerDown={pointerDown} onPointerUp={pointerUp} onPointerMove={pointerMove} onPointerLeave={pointerLeave}>
                 <Typography level="body-lg">
                     Error loading canvas
                 </Typography>
