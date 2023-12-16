@@ -57,11 +57,14 @@ export default function Sandbox() {
     const gameDrop = React.useCallback((e: DragEvent<HTMLCanvasElement>) => {
         if (widget.current) {
             e.preventDefault();
-            widget.current.nodes.push(mapDefaultNode({
-                id: widget.current.dropId,
-                x: 1,
-                y: 1
-            }));
+            const world = widget.current.pxToWorld ? widget.current.pxToWorld(widget.current.mx, widget.current.my) : null;
+            if (world) {
+                widget.current.nodes.push(mapDefaultNode({
+                    id: widget.current.dropId,
+                    x: world.x,
+                    y: world.y
+                }));
+            }
             widget.current.dropId = -1;
             if (widget.current.render)
                 requestAnimationFrame(widget.current.render);

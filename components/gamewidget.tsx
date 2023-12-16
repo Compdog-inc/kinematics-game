@@ -72,6 +72,7 @@ export interface HTMLGameWidget {
     addOnClickId: number;
     dropId: number;
     render?: () => void;
+    pxToWorld?: (x: number, y: number) => { x: number, y: number } | null;
     nodes: GameWidgetNode[];
 }
 
@@ -212,6 +213,220 @@ export default function GameWidget({ drag, onDragOver, onDrop, stref }: {
             ctx.lineWidth = 4;
             ctx.stroke();
 
+            // draw model nodes
+            for (const node of state.current.nodes) {
+                switch (node.id) {
+                    case 0: // fixed node
+                        {
+                            const px = worldToPx(node.x, node.y);
+                            ctx.beginPath();
+                            ctx.ellipse(px.x, px.y, 10, 10, 0, 0, Math.PI * 2);
+                            ctx.fillStyle = state.current.theme === 'dark' ? '#fff' : '#000';
+                            ctx.fill();
+                        }
+                        break;
+                    case 1: // rotating node
+                        {
+                            const px = worldToPx(node.x, node.y);
+                            ctx.beginPath();
+                            ctx.ellipse(px.x, px.y, 20, 20, 0, 0, Math.PI * 2);
+                            ctx.strokeStyle = state.current.theme === 'dark' ? '#fff' : '#000';
+                            ctx.lineWidth = 8;
+                            ctx.stroke();
+                        }
+                        break;
+                    case 2: // translating node
+                        {
+                            const tmp = node as GameWidgetTranslatingNode;
+                            const px = worldToPx(node.x, node.y);
+
+                            const angle = tmp.angle * Math.PI / 180;
+                            const x1 = px.x - 100 * Math.cos(angle);
+                            const y1 = px.y - 100 * Math.sin(angle);
+                            const x2 = px.x + 100 * Math.cos(angle);
+                            const y2 = px.y + 100 * Math.sin(angle);
+                            const x3 = px.x - 120 * Math.cos(angle);
+                            const y3 = px.y - 120 * Math.sin(angle);
+                            const x4 = px.x + 120 * Math.cos(angle);
+                            const y4 = px.y + 120 * Math.sin(angle);
+                            const x5 = px.x - 150 * Math.cos(angle);
+                            const y5 = px.y - 150 * Math.sin(angle);
+                            const x6 = px.x + 150 * Math.cos(angle);
+                            const y6 = px.y + 150 * Math.sin(angle);
+                            const x7 = px.x - 170 * Math.cos(angle);
+                            const y7 = px.y - 170 * Math.sin(angle);
+                            const x8 = px.x + 170 * Math.cos(angle);
+                            const y8 = px.y + 170 * Math.sin(angle);
+                            const x9 = px.x - 180 * Math.cos(angle);
+                            const y9 = px.y - 180 * Math.sin(angle);
+                            const x10 = px.x + 180 * Math.cos(angle);
+                            const y10 = px.y + 180 * Math.sin(angle);
+
+                            ctx.beginPath();
+                            ctx.moveTo(x1, y1);
+                            ctx.lineTo(x2, y2);
+                            ctx.moveTo(x3, y3);
+                            ctx.lineTo(x5, y5);
+                            ctx.moveTo(x4, y4);
+                            ctx.lineTo(x6, y6);
+                            ctx.moveTo(x7, y7);
+                            ctx.lineTo(x9, y9);
+                            ctx.moveTo(x8, y8);
+                            ctx.lineTo(x10, y10);
+                            ctx.lineCap = "round";
+                            ctx.strokeStyle = state.current.theme === 'dark' ? '#858699' : '#595966';
+                            ctx.lineWidth = 8;
+                            ctx.stroke();
+                            ctx.lineCap = "butt";
+
+                            ctx.beginPath();
+                            const rad = 20;
+                            for (let i = 0; i < 3; i++) {
+                                const a = 2 * Math.PI / 3 * i + angle - Math.PI / 2;
+                                const x = px.x + rad * Math.cos(a);
+                                const y = px.y + rad * Math.sin(a);
+                                if (i === 0)
+                                    ctx.moveTo(x, y);
+                                else
+                                    ctx.lineTo(x, y);
+                            }
+                            ctx.closePath();
+                            ctx.strokeStyle = state.current.theme === 'dark' ? '#fff' : '#000';
+                            ctx.lineWidth = 8;
+                            ctx.stroke();
+                        }
+                        break;
+                    case 3: // clamped node
+                        {
+                            const px = worldToPx(node.x, node.y);
+
+                            ctx.beginPath();
+                            ctx.ellipse(px.x, px.y, 10, 10, 0, 0, Math.PI * 2);
+                            ctx.fillStyle = state.current.theme === 'dark' ? '#fff' : '#000';
+                            ctx.fill();
+
+                            ctx.beginPath();
+                            ctx.ellipse(px.x, px.y, 20, 20, 0, 0, Math.PI * 2);
+                            ctx.strokeStyle = state.current.theme === 'dark' ? '#fff' : '#000';
+                            ctx.lineWidth = 8;
+                            ctx.stroke();
+                        }
+                        break;
+                    case 4: // clamped translating node
+                        {
+                            const tmp = node as GameWidgetClampedTranslatingNode;
+                            const px = worldToPx(node.x, node.y);
+                            const px1 = worldToPx(tmp.x1, tmp.y1);
+                            const px2 = worldToPx(tmp.x2, tmp.y2);
+
+                            const angle = Math.atan2(tmp.y2 - tmp.y1, tmp.x2 - tmp.x1);
+
+                            ctx.beginPath();
+                            ctx.moveTo(px1.x, px1.y);
+                            ctx.lineTo(px2.x, px2.y);
+                            ctx.lineCap = "round";
+                            ctx.strokeStyle = state.current.theme === 'dark' ? '#858699' : '#595966';
+                            ctx.lineWidth = 8;
+                            ctx.stroke();
+                            ctx.lineCap = "butt";
+
+                            ctx.beginPath();
+                            const rad = 20;
+                            for (let i = 0; i < 3; i++) {
+                                const a = 2 * Math.PI / 3 * i + angle - Math.PI / 2;
+                                const x = px.x + rad * Math.cos(a);
+                                const y = px.y + rad * Math.sin(a);
+                                if (i === 0)
+                                    ctx.moveTo(x, y);
+                                else
+                                    ctx.lineTo(x, y);
+                            }
+                            ctx.closePath();
+                            ctx.strokeStyle = state.current.theme === 'dark' ? '#fff' : '#000';
+                            ctx.lineWidth = 8;
+                            ctx.stroke();
+                        }
+                        break;
+                    case 5: // arc translating node
+                        {
+                            const tmp = node as GameWidgetArcTranslatingNode;
+                            const min = tmp.minAngle * Math.PI / 180 + Math.PI / 2;
+                            const max = tmp.maxAngle * Math.PI / 180 + Math.PI / 2;
+                            const px = worldToPx(node.x, node.y);
+                            const cp = worldToPx(tmp.cx, tmp.cy);
+                            const rd = worldToPx(tmp.cx + tmp.r, tmp.cy - tmp.r);
+                            const rx = rd.x - cp.x;
+                            const ry = rd.y - cp.y;
+
+                            const angle = tmp.delta * (max - min) + min - Math.PI / 2;
+
+                            ctx.beginPath();
+                            ctx.ellipse(cp.x, cp.y, rx, ry, 0, -min, max, true);
+                            ctx.lineCap = "round";
+                            ctx.strokeStyle = state.current.theme === 'dark' ? '#858699' : '#595966';
+                            ctx.lineWidth = 8;
+                            ctx.stroke();
+                            ctx.lineCap = "butt";
+
+                            ctx.beginPath();
+                            const rad = 20;
+                            for (let i = 0; i < 3; i++) {
+                                const a = 2 * Math.PI / 3 * i + angle - Math.PI / 2;
+                                const x = px.x + rad * Math.cos(a);
+                                const y = px.y + rad * Math.sin(a);
+                                if (i === 0)
+                                    ctx.moveTo(x, y);
+                                else
+                                    ctx.lineTo(x, y);
+                            }
+                            ctx.closePath();
+                            ctx.strokeStyle = state.current.theme === 'dark' ? '#fff' : '#000';
+                            ctx.lineWidth = 8;
+                            ctx.stroke();
+                        }
+                        break;
+                    case 6: // poylgonal translating node
+                        {
+                            const tmp = node as GameWidgetPolygonalTranslatingNode;
+                            const px = worldToPx(node.x, node.y);
+
+                            ctx.beginPath();
+                            for (let i = 0; i < tmp.px.length; i++) {
+                                const wpx = worldToPx(tmp.px[i], tmp.py[i]);
+                                if (i === 0)
+                                    ctx.moveTo(wpx.x, wpx.y);
+                                else
+                                    ctx.lineTo(wpx.x, wpx.y);
+                            }
+                            ctx.lineCap = "round";
+                            const join = ctx.lineJoin;
+                            ctx.lineJoin = "round";
+                            ctx.strokeStyle = state.current.theme === 'dark' ? '#858699' : '#595966';
+                            ctx.lineWidth = 8;
+                            ctx.stroke();
+                            ctx.lineCap = "butt";
+                            ctx.lineJoin = join;
+
+                            ctx.beginPath();
+                            const rad = 20;
+                            for (let i = 0; i < 3; i++) {
+                                const a = 2 * Math.PI / 3 * i - Math.PI / 2;
+                                const x = px.x + rad * Math.cos(a);
+                                const y = px.y + rad * Math.sin(a);
+                                if (i === 0)
+                                    ctx.moveTo(x, y);
+                                else
+                                    ctx.lineTo(x, y);
+                            }
+                            ctx.closePath();
+                            ctx.strokeStyle = state.current.theme === 'dark' ? '#fff' : '#000';
+                            ctx.lineWidth = 8;
+                            ctx.stroke();
+                        }
+                        break;
+                }
+            }
+
             if (state.current.useMp) {
                 if (state.current.dropId !== -1) {
                     ctx.fillStyle = ["red", "blue", "green", "magenta", "yellow", "orange", "teal"][state.current.dropId];
@@ -226,6 +441,38 @@ export default function GameWidget({ drag, onDragOver, onDrop, stref }: {
 
     useEffect(() => {
         state.current.render = render;
+        state.current.pxToWorld = (x, y) => {
+            if (state.current.ctx) {
+                const ctx = state.current.ctx;
+
+                const aspectBounds = (state.current.bounds.right - state.current.bounds.left) /
+                    (state.current.bounds.top - state.current.bounds.bottom);
+                const aspectScreen = ctx.canvas.width / ctx.canvas.height;
+
+                let scrnLeft: number;
+                let scrnRight: number;
+                let scrnTop: number;
+                let scrnBottom: number;
+
+                if (aspectScreen < aspectBounds) {
+                    scrnLeft = state.current.bounds.left;
+                    scrnRight = state.current.bounds.right;
+                    scrnTop = state.current.bounds.top / aspectScreen;
+                    scrnBottom = state.current.bounds.bottom / aspectScreen;
+                } else {
+                    scrnTop = state.current.bounds.top;
+                    scrnBottom = state.current.bounds.bottom;
+                    scrnLeft = state.current.bounds.left * aspectScreen;
+                    scrnRight = state.current.bounds.right * aspectScreen;
+                }
+
+                return {
+                    x: x / ctx.canvas.width * (scrnRight - scrnLeft) + scrnLeft,
+                    y: (1 - y / ctx.canvas.height) * (scrnTop - scrnBottom) + scrnBottom
+                };
+            }
+            return null;
+        };
     }, [render]);
 
     useEffect(() => {
@@ -267,13 +514,20 @@ export default function GameWidget({ drag, onDragOver, onDrop, stref }: {
         e.preventDefault();
         state.current.drag = false;
 
-        if (state.current.dropId === -1 && state.current.addOnClickId !== -1) {
-            state.current.nodes.push(mapDefaultNode({
-                id: state.current.addOnClickId,
-                x: 1,
-                y: 1
-            }));
-            requestAnimationFrame(render);
+        const dx = Math.abs(state.current.mx - state.current.startMx);
+        const dy = Math.abs(state.current.my - state.current.startMy);
+        if (dx <= 5 && dy <= 5) {
+            if (state.current.dropId === -1 && state.current.addOnClickId !== -1 && state.current.useMp) {
+                const world = state.current.pxToWorld ? state.current.pxToWorld(state.current.mx, state.current.my) : null;
+                if (world) {
+                    state.current.nodes.push(mapDefaultNode({
+                        id: state.current.addOnClickId,
+                        x: world.x,
+                        y: world.y
+                    }));
+                    requestAnimationFrame(render);
+                }
+            }
         }
     }, [state, render]);
 
