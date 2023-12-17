@@ -59,10 +59,14 @@ export default function Sandbox() {
             e.preventDefault();
             const world = widget.current.pxToWorld ? widget.current.pxToWorld(widget.current.mx, widget.current.my) : null;
             if (world) {
+                for (const n of widget.current.nodes) {
+                    n.selected = false;
+                }
                 widget.current.nodes.push(mapDefaultNode({
                     id: widget.current.dropId,
                     x: world.x,
-                    y: world.y
+                    y: world.y,
+                    selected: true
                 }));
             }
             widget.current.dropId = -1;
