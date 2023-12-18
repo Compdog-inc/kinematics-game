@@ -1,6 +1,5 @@
 .card {
     width: 100%;
-    touch-action: none;
     position: relative;
     transform: translate(0);
 }

@@ -38,13 +38,7 @@ export default function SandboxCard(props: {
     drop?: (s: string) => void,
     id: string
 }) {
-    return (<HoverCard orientation="horizontal" variant="outlined" className={styles.card} draggable onDragStart={(e) => {
-        e.dataTransfer.setData("sandbox/node", props.id);
-        if (props.drop) {
-            props.drop(props.id);
-        }
-        e.dataTransfer.dropEffect = "copy";
-    }}>
+    return (<HoverCard orientation="horizontal" variant="outlined" className={styles.card}>
         <CardOverflow>
             <ThumbnailAspectRatio ratio="1" flex>
                 <Image alt="" aria-hidden src={props.thumbnail} placeholder="blur" />
