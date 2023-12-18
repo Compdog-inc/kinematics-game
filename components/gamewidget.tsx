@@ -964,6 +964,9 @@ export default function GameWidget({ drag, onDragOver, onDrop, stref }: {
     const pointerDown = React.useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
         e.preventDefault();
         const bounds = e.currentTarget.getBoundingClientRect();
+        state.current.mx = (e.clientX - bounds.left) * 2;
+        state.current.my = (e.clientY - bounds.top) * 2;
+        state.current.useMp = true;
         state.current.drag = true;
         state.current.startMx = (e.clientX - bounds.left) * 2;
         state.current.startMy = (e.clientY - bounds.top) * 2;
@@ -971,6 +974,18 @@ export default function GameWidget({ drag, onDragOver, onDrop, stref }: {
         state.current.startDragY = state.current.bounds.bottom;
 
         for (const node of state.current.nodes) {
+            node.hover = false;
+            if (state.current.worldToPx) {
+                const px = state.current.worldToPx(node.x, node.y);
+                if (px) {
+                    const dx = px.x - state.current.mx;
+                    const dy = px.y - state.current.my;
+                    if (dx * dx + dy * dy <= 400) {
+                        node.hover = true;
+                    }
+                }
+            }
+
             node.selected = false;
             if (node.hover) {
                 node.selected = true;
@@ -991,14 +1006,23 @@ export default function GameWidget({ drag, onDragOver, onDrop, stref }: {
         const dy = Math.abs(state.current.my - state.current.startMy);
         if (dx <= 5 && dy <= 5) {
             if (state.current.dropId === -1 && state.current.addOnClickId !== -1 && state.current.useMp) {
-                const world = state.current.pxToWorld ? state.current.pxToWorld(state.current.mx, state.current.my) : null;
-                if (world) {
-                    state.current.nodes.push(mapDefaultNode({
-                        id: state.current.addOnClickId,
-                        x: world.x,
-                        y: world.y
-                    }));
-                    requestAnimationFrame(render);
+                let anyOver = false;
+                for (const node of state.current.nodes) {
+                    if (node.hover && node.selected) {
+                        anyOver = true;
+                        break;
+                    }
+                }
+                if (!anyOver) {
+                    const world = state.current.pxToWorld ? state.current.pxToWorld(state.current.mx, state.current.my) : null;
+                    if (world) {
+                        state.current.nodes.push(mapDefaultNode({
+                            id: state.current.addOnClickId,
+                            x: world.x,
+                            y: world.y
+                        }));
+                        requestAnimationFrame(render);
+                    }
                 }
             }
         }
