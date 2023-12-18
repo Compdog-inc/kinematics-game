@@ -5,7 +5,7 @@ import CardContent from "@mui/joy/CardContent";
 import Typography from "@mui/joy/Typography";
 import Image from "next/image";
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
-import { MouseEventHandler, ReactNode } from "react";
+import { MouseEventHandler, ReactNode, useCallback, useRef, PointerEvent } from "react";
 import styles from "../styles/sandboxcard.module.css";
 import { styled } from '@mui/joy/styles';
 import IconButton from "@mui/joy/IconButton";
@@ -38,7 +38,109 @@ export default function SandboxCard(props: {
     drop?: (s: string) => void,
     id: string
 }) {
-    return (<HoverCard orientation="horizontal" variant="outlined" className={styles.card}>
+    const rootRef = useRef(null as HTMLDivElement | null);
+    const popupRef = useRef(null as HTMLDivElement | null);
+
+    const pointerDown = useCallback((e: PointerEvent<HTMLDivElement>) => {
+        if (rootRef.current) {
+            e.preventDefault();
+            const bounds = rootRef.current.getBoundingClientRect();
+
+            const blur = document.createElement("div");
+            blur.style.position = "fixed";
+            blur.style.left = "0";
+            blur.style.top = "0";
+            blur.style.right = "0";
+            blur.style.bottom = "0";
+            blur.style.pointerEvents = "none";
+            if (window.visualViewport) {
+                blur.style.backdropFilter = "blur(8px)";
+                blur.style.opacity = "0";
+                blur.style.transition = "opacity 300ms cubic-bezier(0.76, 0, 1, 0.76) 100ms";
+                blur.style.mask = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${window.visualViewport.width} ${window.visualViewport.height}" preserveAspectRatio="none"><rect x="0" y="0" width="100%" height="100%" fill="white"/><rect x="${bounds.x}" y="${bounds.y}" width="${bounds.width}" height="${bounds.height}" fill="black" rx="8"/></svg>') luminance 0/100% 100%`;
+            }
+            requestAnimationFrame(() => blur.style.opacity = "1");
+            document.body.appendChild(blur);
+
+            const removeBlur = () => {
+                if (blur.style.opacity === "1") {
+                    blur.style.transition = "opacity 150ms cubic-bezier(0.03, 0.79, 0.78, 1) 0s";
+                    blur.style.opacity = "0";
+                    setTimeout(() => {
+                        blur.remove();
+                    }, 150);
+                }
+            };
+
+            let timeout: NodeJS.Timeout;
+
+            const startMX = e.clientX;
+            const startMY = e.clientY;
+            const tm = (e1: globalThis.PointerEvent) => {
+                const dx = e1.clientX - startMX;
+                const dy = e1.clientY - startMY;
+                const delta = Math.max(dx, dy);
+                if (delta > 5) {
+                    clearTimeout(timeout);
+                    removeBlur();
+                }
+            };
+
+            window.addEventListener('pointermove', tm, {
+                once: false,
+                passive: true
+            });
+
+            window.addEventListener('pointerup', tm, {
+                once: true,
+                passive: true
+            });
+
+            timeout = setTimeout(() => {
+                if (rootRef.current) {
+                    window.removeEventListener('pointermove', tm);
+                    window.removeEventListener('pointerup', tm);
+                    const offsetX = e.clientX - bounds.x;
+                    const offsetY = e.clientY - bounds.y;
+                    const elem = document.createElement("div");
+                    elem.style.position = "fixed";
+                    elem.style.touchAction = "none";
+                    elem.style.pointerEvents = "none";
+                    elem.style.left = (e.clientX - offsetX) + "px";
+                    elem.style.top = (e.clientY - offsetY) + "px";
+                    elem.style.width = bounds.width + "px";
+                    elem.style.height = bounds.height + "px";
+                    elem.innerHTML = rootRef.current.outerHTML;
+                    document.body.appendChild(elem);
+                    popupRef.current = elem;
+
+                    const move = (e: globalThis.PointerEvent) => {
+                        if (popupRef.current) {
+                            e.preventDefault();
+                            removeBlur();
+                            popupRef.current.style.left = (e.clientX - offsetX) + "px";
+                            popupRef.current.style.top = (e.clientY - offsetY) + "px";
+                        }
+                    };
+
+                    window.addEventListener('pointermove', move, {
+                        passive: false
+                    });
+
+                    window.addEventListener('pointerup', () => {
+                        popupRef.current?.remove();
+                        removeBlur();
+                        window.removeEventListener('pointermove', move);
+                    }, {
+                        once: true,
+                        passive: true
+                    });
+                }
+            }, 300);
+        }
+    }, []);
+
+    return (<HoverCard orientation="horizontal" variant="outlined" className={styles.card} ref={rootRef} onContextMenu={e => e.preventDefault()} onPointerDown={pointerDown}>
         <CardOverflow>
             <ThumbnailAspectRatio ratio="1" flex>
                 <Image alt="" aria-hidden src={props.thumbnail} placeholder="blur" />

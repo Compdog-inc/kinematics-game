@@ -2,6 +2,7 @@
     width: 100%;
     position: relative;
     transform: translate(0);
+    touch-action:pan-y;
 }
 
 .card,
