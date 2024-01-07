@@ -151,7 +151,8 @@ export default function SandboxCard(props: {
                             popupRef.current.style.left = (e.clientX - offsetX) + "px";
                             popupRef.current.style.top = (e.clientY - offsetY) + "px";
                             if (typeof (dragFilter) !== 'undefined' && e.target != null) {
-                                const filter = dragFilter(e.target as HTMLElement);
+                                const castTarget = document.elementFromPoint(e.clientX, e.clientY);
+                                const filter = dragFilter(castTarget as HTMLElement);
                                 if (filter && typeof (dragOver) !== 'undefined') {
                                     dragOver(e, id);
                                     elem.style.opacity = '.5';
