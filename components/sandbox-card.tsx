@@ -137,6 +137,8 @@ export default function SandboxCard(props: {
                     elem.style.top = (e.clientY - offsetY) + "px";
                     elem.style.width = bounds.width + "px";
                     elem.style.height = bounds.height + "px";
+                    elem.style.opacity = "1";
+                    elem.style.transition = "opacity .2s";
                     elem.innerHTML = rootRef.current.outerHTML;
                     document.body.appendChild(elem);
                     popupRef.current = elem;
@@ -152,10 +154,12 @@ export default function SandboxCard(props: {
                                 const filter = dragFilter(e.target as HTMLElement);
                                 if (filter && typeof (dragOver) !== 'undefined') {
                                     dragOver(e, id);
+                                    elem.style.opacity = '.5';
                                 }
                                 if (filter != prevFilter) {
                                     prevFilter = filter;
                                     if (!filter && typeof (dragLeave) !== 'undefined') {
+                                        elem.style.opacity = '1';
                                         dragLeave();
                                     }
                                 }
