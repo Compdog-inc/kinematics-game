@@ -5,10 +5,11 @@ import { Analytics } from '@vercel/analytics/react';
 import Head from "next/head";
 import Navbar from "../components/navbar";
 import Link from "@mui/joy/Link";
+import styles from "../styles/root.module.css";
 
 function App({ Component, pageProps }: AppProps) {
     return (
-        <div suppressHydrationWarning>
+        <div suppressHydrationWarning className={styles.page}>
             <CssVarsProvider defaultMode="system">
                 <CssBaseline />
                 <Head>
