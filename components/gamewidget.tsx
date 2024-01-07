@@ -13,6 +13,17 @@ export interface GameWidgetNode {
     dragging?: boolean;
     xdrag?: number;
     ydrag?: number;
+    handles?: GameWidgetHandle[];
+}
+
+export interface GameWidgetHandle {
+    id: number;
+    x: number;
+    y: number;
+    hover?: boolean;
+    dragging?: boolean;
+    xdrag?: number;
+    ydrag?: number;
 }
 
 export interface GameWidgetFixedNode extends GameWidgetNode {
@@ -112,12 +123,252 @@ export const mapDefaultNode = (node: GameWidgetNode): GameWidgetNode => {
             (node as GameWidgetArcTranslatingNode).delta = 0;
             break;
         case 6: // polygonal translating node
-            (node as GameWidgetPolygonalTranslatingNode).px = [node.x - 1, node.x - .5, node.x, node.x + .5, node.x + 1];
-            (node as GameWidgetPolygonalTranslatingNode).py = [node.y, node.y - .6, node.y, node.y - .6, node.y];
+            (node as GameWidgetPolygonalTranslatingNode).px = [-1, -.5, 0, .5, 1];
+            (node as GameWidgetPolygonalTranslatingNode).py = [0, -.6, 0, -.6, 0];
             (node as GameWidgetPolygonalTranslatingNode).delta = .5;
             break;
     }
     return node;
+};
+
+export const getHandles = (state: HTMLGameWidget, node: GameWidgetNode): GameWidgetHandle[] => {
+    if (state.worldToPx) {
+        const px = state.worldToPx(node.x, node.y);
+        if (px) {
+            switch (node.id) {
+                case 2: // translating node
+                    const angle = (node as GameWidgetTranslatingNode).angle * Math.PI / 180;
+                    return [Object.assign(node.handles ? node.handles[0] : {}, {
+                        id: 0,
+                        x: px.x + 120 * Math.cos(angle),
+                        y: px.y + 120 * Math.sin(angle)
+                    })];
+                case 3: // clamped node
+                    const minAngle = (node as GameWidgetClampedNode).minAngle * Math.PI / 180 + Math.PI / 2;
+                    const maxAngle = (node as GameWidgetClampedNode).maxAngle * Math.PI / 180 + Math.PI / 2;
+                    return [Object.assign(node.handles ? node.handles[0] : {}, {
+                        id: 0,
+                        x: px.x + 120 * Math.cos(minAngle),
+                        y: px.y - 120 * Math.sin(minAngle)
+                    }), Object.assign(node.handles ? node.handles[1] : {}, {
+                        id: 1,
+                        x: px.x + 120 * Math.cos(maxAngle),
+                        y: px.y - 120 * Math.sin(maxAngle)
+                    })];
+                case 4: // clamped translating node
+                    const px1 = state.worldToPx((node as GameWidgetClampedTranslatingNode).x1, (node as GameWidgetClampedTranslatingNode).y1);
+                    const px2 = state.worldToPx((node as GameWidgetClampedTranslatingNode).x2, (node as GameWidgetClampedTranslatingNode).y2);
+                    if (px1 && px2) {
+                        return [
+                            Object.assign(node.handles ? node.handles[0] : {}, {
+                                id: 0,
+                                x: px1.x,
+                                y: px1.y
+                            }),
+                            Object.assign(node.handles ? node.handles[1] : {}, {
+                                id: 1,
+                                x: px2.x,
+                                y: px2.y
+                            })
+                        ];
+                    }
+                    break;
+                case 5: // arc translating node
+                    const cp = state.worldToPx((node as GameWidgetArcTranslatingNode).cx, (node as GameWidgetArcTranslatingNode).cy);
+                    const rd = state.worldToPx((node as GameWidgetArcTranslatingNode).cx + (node as GameWidgetArcTranslatingNode).r, (node as GameWidgetArcTranslatingNode).cy - (node as GameWidgetArcTranslatingNode).r);
+                    if (cp && rd) {
+                        const rx = rd.x - cp.x;
+                        const gizrad = 120 + rx;
+                        const minAngle = (node as GameWidgetArcTranslatingNode).minAngle * Math.PI / 180 + Math.PI / 2;
+                        const maxAngle = (node as GameWidgetArcTranslatingNode).maxAngle * Math.PI / 180 + Math.PI / 2;
+                        return [
+                            Object.assign(node.handles ? node.handles[0] : {}, {
+                                id: 0,
+                                x: cp.x,
+                                y: cp.y
+                            }), Object.assign(node.handles ? node.handles[1] : {}, {
+                                id: 1,
+                                x: cp.x + gizrad * Math.cos(minAngle),
+                                y: cp.y - gizrad * Math.sin(minAngle)
+                            }), Object.assign(node.handles ? node.handles[2] : {}, {
+                                id: 2,
+                                x: cp.x + gizrad * Math.cos(maxAngle),
+                                y: cp.y - gizrad * Math.sin(maxAngle)
+                            })];
+                    }
+                    break;
+                case 6: // polygonal translating node
+                    const tmp = (node as GameWidgetPolygonalTranslatingNode);
+                    let pointHandles: GameWidgetHandle[] = [];
+
+                    if (tmp.px.length > 0) {
+                        const wpx0 = state.worldToPx(tmp.px[0] + node.x, tmp.py[0] + node.y);
+                        if (wpx0) {
+                            const firstAngle = tmp.px.length > 1 ? Math.atan2(tmp.py[0] - tmp.py[1], tmp.px[0] - tmp.px[1]) : 0;
+                            pointHandles.push(
+                                Object.assign(node.handles && node.handles.length > 0 && node.handles[0].id === 0 ? node.handles[0] : {},
+                                    { id: 0, x: wpx0.x + 110 * Math.cos(firstAngle), y: wpx0.y - 110 * Math.sin(firstAngle) }
+                                )
+                            );
+                        }
+
+                        if (tmp.px.length > 1) {
+                            const wpx1 = state.worldToPx(tmp.px[tmp.px.length - 1] + node.x, tmp.py[tmp.py.length - 1] + node.y);
+                            if (wpx1) {
+                                const lastAngle = Math.atan2(tmp.py[tmp.py.length - 1] - tmp.py[tmp.py.length - 2], tmp.px[tmp.px.length - 1] - tmp.px[tmp.px.length - 2]);
+                                pointHandles.push(
+                                    Object.assign(node.handles && node.handles.length > 1 && node.handles[1].id === 1 ? node.handles[1] : {},
+                                        { id: 1, x: wpx1.x + 110 * Math.cos(lastAngle), y: wpx1.y - 110 * Math.sin(lastAngle) }
+                                    )
+                                );
+                            }
+                        }
+                    }
+
+                    let startInd = node.handles ? node.handles.findIndex((v => v.id === 2)) : -1;
+
+                    for (let i = 0; i < tmp.px.length; i++) {
+                        const wpx = state.worldToPx(tmp.px[i] + node.x, tmp.py[i] + node.y);
+                        if (wpx) {
+                            pointHandles.push(Object.assign(startInd === -1 || !node.handles ? {} : node.handles[startInd + i], { id: 2 + i, x: wpx.x, y: wpx.y }));
+                        }
+                    }
+                    return pointHandles;
+            }
+        }
+    }
+    return [];
+};
+
+const updateHandle = (state: HTMLGameWidget, node: GameWidgetNode, handle: GameWidgetHandle) => {
+    if (state.worldToPx && state.pxToWorld) {
+        const px = state.worldToPx(node.x, node.y);
+        if (px) {
+            switch (node.id) {
+                case 2: // translating node
+                    {
+                        const x = (handle.x - px.x) / 120;
+                        const y = (handle.y - px.y) / 120;
+                        (node as GameWidgetTranslatingNode).angle = Math.atan2(y, x) * 180 / Math.PI;
+                    }
+                    break;
+                case 3: // clamped node
+                    {
+                        const x = (handle.x - px.x) / 120;
+                        const y = -(handle.y - px.y) / 120;
+                        let t = Math.atan2(y, x);
+                        if (t > -Math.PI && t < 0) {
+                            t = Math.PI * 2 + t;
+                        }
+                        const angle = (t - Math.PI / 2) * 180 / Math.PI;
+                        if (handle.id === 0) {
+                            (node as GameWidgetClampedNode).minAngle = angle;
+                        } else if (handle.id === 1) {
+                            (node as GameWidgetClampedNode).maxAngle = angle;
+                        }
+                        let realMin = 0;
+                        let realMax = (node as GameWidgetClampedNode).maxAngle - (node as GameWidgetClampedNode).minAngle;
+                        if (realMax < 0) {
+                            realMax += 360;
+                        }
+                        let normAngle = (node as GameWidgetClampedNode).angle + 90;
+                        if (normAngle > -90 && normAngle < 0) {
+                            normAngle = 180 + normAngle;
+                        }
+                        normAngle = normAngle - 90;
+                        let realAngle = normAngle - (node as GameWidgetClampedNode).minAngle;
+                        if (realAngle < 0) {
+                            realAngle += 360;
+                        } else if (realAngle > 360) {
+                            realAngle %= 360;
+                        }
+                        (node as GameWidgetClampedNode).angle = Math.max(realMin, Math.min(realMax, realAngle)) + (node as GameWidgetClampedNode).minAngle;
+                    }
+                    break;
+                case 4: // clamped translating node
+                    {
+                        const pos = state.pxToWorld(handle.x, handle.y);
+                        if (pos) {
+                            if (handle.id === 0) {
+                                (node as GameWidgetClampedTranslatingNode).x1 = pos.x;
+                                (node as GameWidgetClampedTranslatingNode).y1 = pos.y;
+                            } else if (handle.id === 1) {
+                                (node as GameWidgetClampedTranslatingNode).x2 = pos.x;
+                                (node as GameWidgetClampedTranslatingNode).y2 = pos.y;
+                            }
+                        }
+                    }
+                    break;
+                case 5: // arc translating node
+                    {
+                        if (handle.id === 0) {
+                            const cp = state.pxToWorld(handle.x, handle.y);
+                            if (cp) {
+                                (node as GameWidgetArcTranslatingNode).cx = cp.x;
+                                (node as GameWidgetArcTranslatingNode).cy = cp.y;
+                            }
+                        } else {
+                            const cp = state.worldToPx((node as GameWidgetArcTranslatingNode).cx, (node as GameWidgetArcTranslatingNode).cy);
+                            if (cp) {
+                                const normX = handle.x - cp.x;
+                                const normY = -handle.y + cp.y;
+                                const gizrad = Math.sqrt(normX * normX + normY * normY);
+                                const x = normX / gizrad;
+                                const y = normY / gizrad;
+                                const angle = (Math.atan2(y, x) - Math.PI / 2) * 180 / Math.PI;
+                                if (handle.id === 1) {
+                                    (node as GameWidgetArcTranslatingNode).minAngle = angle;
+                                } else if (handle.id === 2) {
+                                    (node as GameWidgetArcTranslatingNode).maxAngle = angle;
+                                }
+                                const rad = gizrad - 120;
+                                const rd = state.pxToWorld(rad + cp.x, rad - cp.y);
+                                if (rd) {
+                                    const r = rd.x - (node as GameWidgetArcTranslatingNode).cx;
+                                    (node as GameWidgetArcTranslatingNode).r = Math.max(0.00001, r);
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case 6: // polygonal translating node
+                    {
+                        const tmp = (node as GameWidgetPolygonalTranslatingNode);
+                        const wd = state.pxToWorld(handle.x, handle.y);
+                        if (wd) {
+                            const x = wd.x - tmp.x;
+                            const y = wd.y - tmp.y;
+                            if (handle.id === 0) {
+                                tmp.px.unshift(x);
+                                tmp.py.unshift(y);
+                                tmp.handles = [];
+                                tmp.handles = getHandles(state, tmp);
+                                const ind = tmp.handles.findIndex(v => v.id === 2);
+                                tmp.handles[ind].hover = true;
+                                tmp.handles[ind].dragging = true;
+                                tmp.handles[ind].xdrag = handle.xdrag;
+                                tmp.handles[ind].ydrag = handle.ydrag;
+                            } else if (handle.id === 1) {
+                                tmp.px.push(x);
+                                tmp.py.push(y);
+                                tmp.handles = [];
+                                tmp.handles = getHandles(state, tmp);
+                                const ind = tmp.handles.findIndex(v => v.id === 2 + tmp.px.length - 1);
+                                tmp.handles[ind].hover = true;
+                                tmp.handles[ind].dragging = true;
+                                tmp.handles[ind].xdrag = handle.xdrag;
+                                tmp.handles[ind].ydrag = handle.ydrag;
+                            } else {
+                                const ind = handle.id - 2;
+                                tmp.px[ind] = x;
+                                tmp.py[ind] = y;
+                            }
+                        }
+                    }
+                    break;
+            }
+        }
+    }
 };
 
 export default React.forwardRef(function GameWidget({ drag, stref }: {
@@ -385,6 +636,14 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                         ctx.ellipse(px.x + 120 * Math.cos(maxAngle), px.y - 120 * Math.sin(maxAngle), 30, 30, 0, 0, Math.PI * 2);
                                         ctx.fillStyle = "yellow";
                                         ctx.fill();
+
+                                        ctx.beginPath();
+                                        ctx.ellipse(px.x, px.y, 120, 120, 0, -maxAngle, -minAngle, false);
+                                        ctx.lineCap = "round";
+                                        ctx.strokeStyle = "yellow";
+                                        ctx.lineWidth = 4;
+                                        ctx.stroke();
+                                        ctx.lineCap = "butt";
                                     }
                                 }
                             }
@@ -452,7 +711,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                     const angle = tmp.delta * (max - min) + min - Math.PI / 2;
 
                                     ctx.beginPath();
-                                    ctx.ellipse(cp.x, cp.y, rx, ry, 0, -min, max, true);
+                                    ctx.ellipse(cp.x, cp.y, rx, ry, 0, -max, -min, false);
                                     ctx.lineCap = "round";
                                     ctx.strokeStyle = state.current.theme === 'dark' ? '#858699' : '#595966';
                                     ctx.lineWidth = 8;
@@ -518,7 +777,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                 if (px) {
                                     ctx.beginPath();
                                     for (let i = 0; i < tmp.px.length; i++) {
-                                        const wpx = state.current.worldToPx(tmp.px[i], tmp.py[i]);
+                                        const wpx = state.current.worldToPx(tmp.px[i] + node.x, tmp.py[i] + node.y);
                                         if (wpx) {
                                             if (i === 0)
                                                 ctx.moveTo(wpx.x, wpx.y);
@@ -553,7 +812,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
 
                                     if (node.selected) {
                                         for (let i = 0; i < tmp.px.length; i++) {
-                                            const wpx = state.current.worldToPx(tmp.px[i], tmp.py[i]);
+                                            const wpx = state.current.worldToPx(tmp.px[i] + node.x, tmp.py[i] + node.y);
                                             if (wpx) {
                                                 ctx.beginPath();
                                                 ctx.ellipse(wpx.x, wpx.y, 30, 30, 0, 0, Math.PI * 2);
@@ -564,7 +823,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
 
                                         if (tmp.px.length > 0) {
                                             // render extend handles
-                                            const wpx0 = state.current.worldToPx(tmp.px[0], tmp.py[0]);
+                                            const wpx0 = state.current.worldToPx(tmp.px[0] + node.x, tmp.py[0] + node.y);
                                             if (wpx0) {
                                                 const firstAngle = tmp.px.length > 1 ? Math.atan2(tmp.py[0] - tmp.py[1], tmp.px[0] - tmp.px[1]) : 0;
                                                 ctx.beginPath();
@@ -590,7 +849,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                             }
 
                                             if (tmp.px.length > 1) {
-                                                const wpx1 = state.current.worldToPx(tmp.px[tmp.px.length - 1], tmp.py[tmp.py.length - 1]);
+                                                const wpx1 = state.current.worldToPx(tmp.px[tmp.px.length - 1] + node.x, tmp.py[tmp.py.length - 1] + node.y);
                                                 if (wpx1) {
                                                     const lastAngle = Math.atan2(tmp.py[tmp.py.length - 1] - tmp.py[tmp.py.length - 2], tmp.px[tmp.px.length - 1] - tmp.px[tmp.px.length - 2]);
                                                     ctx.beginPath();
@@ -973,23 +1232,56 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
 
         for (const node of state.current.nodes) {
             node.hover = false;
+            let handleHover = false;
             if (state.current.worldToPx) {
-                const px = state.current.worldToPx(node.x, node.y);
-                if (px) {
-                    const dx = px.x - state.current.mx;
-                    const dy = px.y - state.current.my;
-                    if (dx * dx + dy * dy <= 400) {
-                        node.hover = true;
+                if (node.handles && node.selected) {
+                    // check handles
+                    for (const handle of node.handles) {
+                        handle.hover = false;
+                        const dx = handle.x - state.current.mx;
+                        const dy = handle.y - state.current.my;
+                        if (dx * dx + dy * dy <= 900) {
+                            handle.hover = true;
+                            handleHover = true;
+                        }
+                    }
+                }
+                if (!handleHover) {
+                    const px = state.current.worldToPx(node.x, node.y);
+                    if (px) {
+                        const dx = px.x - state.current.mx;
+                        const dy = px.y - state.current.my;
+                        if (dx * dx + dy * dy <= 400) {
+                            node.hover = true;
+                        }
                     }
                 }
             }
 
-            node.selected = false;
-            if (node.hover) {
-                node.selected = true;
-                node.dragging = true;
-                node.xdrag = node.x;
-                node.ydrag = node.y;
+            if (!handleHover) {
+                node.selected = false;
+                if (node.hover) {
+                    node.selected = true;
+                    node.dragging = true;
+                    node.xdrag = node.x;
+                    node.ydrag = node.y;
+                }
+            } else if (node.handles) {
+                for (const handle of node.handles) {
+                    if (handle.hover) {
+                        handle.dragging = true;
+                        handle.xdrag = handle.x;
+                        handle.ydrag = handle.y;
+                    }
+                }
+                if (node.handles) {
+                    for (let i = 0; i < node.handles.length; ++i) {
+                        if (node.handles[i].dragging) {
+                            updateHandle(state.current, node, node.handles[i]);
+                            node.handles = getHandles(state.current, node);
+                        }
+                    }
+                }
             }
         }
 
@@ -1028,6 +1320,13 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
         for (const node of state.current.nodes) {
             if (node.dragging) {
                 node.dragging = false;
+            }
+            if (node.handles) {
+                for (const handle of node.handles) {
+                    if (handle.dragging) {
+                        handle.dragging = false;
+                    }
+                }
             }
         }
     }, [state, render]);
@@ -1075,6 +1374,17 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                         fallthrough = false;
                         node.x = node.xdrag + wdx * Math.max(1, aspectScreen);
                         node.y = node.ydrag + wdy / Math.min(1, aspectScreen);
+                        node.handles = getHandles(state.current, node);
+                    } else if (node.handles) {
+                        for (let i = 0; i < node.handles.length; ++i) {
+                            if (node.handles[i].dragging && typeof (node.handles[i].xdrag) === 'number' && typeof (node.handles[i].ydrag) === 'number') {
+                                fallthrough = false;
+                                node.handles[i].x = (node.handles[i].xdrag || 0) + dx;
+                                node.handles[i].y = (node.handles[i].ydrag || 0) + dy;
+                                updateHandle(state.current, node, node.handles[i]);
+                                node.handles = getHandles(state.current, node);
+                            }
+                        }
                     }
                 }
 
@@ -1086,6 +1396,10 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                     state.current.bounds.bottom = state.current.startDragY - wdy;
                     state.current.bounds.right = state.current.bounds.left + w;
                     state.current.bounds.top = state.current.bounds.bottom + h;
+
+                    for (const node of state.current.nodes) {
+                        node.handles = getHandles(state.current, node);
+                    }
                 }
             }
 
