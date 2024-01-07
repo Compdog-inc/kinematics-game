@@ -3,11 +3,12 @@ import GameWidget, { HTMLGameWidget, mapDefaultNode, getHandles } from "../compo
 import Box from "@mui/joy/Box";
 import Drawer from "@mui/joy/Drawer";
 import IconButton from "@mui/joy/IconButton";
-import React from "react";
+import React, { useEffect } from "react";
 import KeyboardDoubleArrowLeftRounded from '@mui/icons-material/KeyboardDoubleArrowLeftRounded';
 import KeyboardDoubleArrowRightRounded from '@mui/icons-material/KeyboardDoubleArrowRightRounded';
 import KeyboardDoubleArrowUpRounded from '@mui/icons-material/KeyboardDoubleArrowUpRounded';
 import KeyboardDoubleArrowDownRounded from '@mui/icons-material/KeyboardDoubleArrowDownRounded';
+import IosShareRounded from '@mui/icons-material/IosShareRounded';
 import styles from "../styles/sandbox.module.css";
 import classNames from "classnames";
 import List from "@mui/joy/List";
@@ -18,10 +19,24 @@ import SandboxCard from "../components/sandbox-card";
 import HelpOutlineRounded from "@mui/icons-material/HelpOutlineRounded";
 import Tooltip from "@mui/joy/Tooltip";
 import ListDivider from "@mui/joy/ListDivider";
+import Card from "@mui/joy/Card";
+import CardContent from "@mui/joy/CardContent";
+import Typography from "@mui/joy/Typography";
+import Input from "@mui/joy/Input";
+import Button from "@mui/joy/Button";
 
 export default function Sandbox() {
     const [open, setOpen] = React.useState(true);
     const [currentAdd, setCurrentAdd] = React.useState(-1);
+    const [shareUrl, setShareUrl] = React.useState("");
+    const [copyBtnCopied, setCopyBtnCopied] = React.useState(false);
+    const [showShareDialog, setShowShareDialog] = React.useState(false);
+
+    const shareUrlInput = React.useRef(null as HTMLInputElement | null);
+
+    useEffect(() => {
+        setShareUrl(location.href + "?b=hello");
+    }, []);
 
     const widget = React.useRef(null as HTMLGameWidget | null);
     const widgetCv = React.useRef(null as HTMLCanvasElement | null);
@@ -168,6 +183,62 @@ export default function Sandbox() {
                     }} className={classNames(styles.openBtn, { [styles.show]: !open })}>
                         <KeyboardDoubleArrowUpRounded />
                     </IconButton>
+                    <Tooltip title={
+                        <>
+                            Share this simulation
+                        </>
+                    } arrow placement="left" variant="outlined">
+                        <IconButton variant="plain" size="md" tabIndex={1} aria-label="Share this simulation" sx={{
+                            position: 'fixed',
+                            right: '5px',
+                            top: '65px',
+                            zIndex: '2'
+                        }} onClick={() => { setShowShareDialog(true); setCopyBtnCopied(false); }}>
+                            <IosShareRounded />
+                        </IconButton>
+                    </Tooltip>
+                    <Box sx={{
+                        position: 'fixed',
+                        left: 0,
+                        top: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0,0,0,0)',
+                        touchAction: 'none',
+                        zIndex: '1',
+                        display: showShareDialog ? 'initial' : 'none'
+                    }} onPointerDown={(e) => { e.currentTarget === e.target && setShowShareDialog(false); }}>
+                        <Card color="neutral" variant="outlined" sx={{
+                            position: 'fixed',
+                            right: '10px',
+                            top: '106px'
+                        }}>
+                            <CardContent>
+                                <Typography level="title-lg">Share Simulation</Typography>
+                                <Typography level="body-xs">Copy and share this link</Typography>
+                                <Input value={shareUrl} ref={shareUrlInput} color="neutral" variant="outlined"
+                                    endDecorator={
+                                        <Button variant="solid" color="primary" onClick={() => {
+                                            if (shareUrlInput.current) {
+                                                const elem = shareUrlInput.current.querySelector("input");
+                                                if (elem) {
+                                                    elem.select();
+                                                }
+                                                if (typeof (navigator) !== 'undefined' && typeof (navigator.clipboard) !== 'undefined' && typeof (navigator.clipboard.writeText) === 'function') {
+                                                    navigator.clipboard.writeText(shareUrl);
+                                                } else {
+                                                    console.warn("Forced to use deprecated document.execCommand");
+                                                    document.execCommand("copy");
+                                                }
+                                                setCopyBtnCopied(true);
+                                            }
+                                        }}>
+                                            {copyBtnCopied ? "Copied" : "Copy"}
+                                        </Button>
+                                    } sx={{ width: 300 }} />
+                            </CardContent>
+                        </Card>
+                    </Box>
                     <Drawer open={open} onClose={() => setOpen(false)} anchor="left" size="md" hideBackdrop slotProps={{
                         root: {
                             sx: {
@@ -259,7 +330,7 @@ export default function Sandbox() {
                         {drawerContent}
                     </Drawer>
                 </Box>
-            </Box>
+            </Box >
         </>
     )
 }
