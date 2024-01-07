@@ -158,7 +158,7 @@ export default function SandboxCard(props: {
                         passive: true
                     });
                 }
-            }, 300);
+            }, e.pointerType === "mouse" ? 0 : 300);
         }
     }, []);
 
