@@ -120,12 +120,10 @@ export const mapDefaultNode = (node: GameWidgetNode): GameWidgetNode => {
     return node;
 };
 
-export default function GameWidget({ drag, onDragOver, onDrop, stref }: {
+export default React.forwardRef(function GameWidget({ drag, stref }: {
     drag?: boolean,
-    onDragOver?: React.DragEventHandler<HTMLCanvasElement>
-    onDrop?: React.DragEventHandler<HTMLCanvasElement>,
     stref?: (o: HTMLGameWidget | null) => any | undefined
-}) {
+}, ref: React.ForwardedRef<HTMLCanvasElement>) {
     const canvasElem = React.useRef(null as HTMLCanvasElement | null);
     const { mode, systemMode } = useColorScheme();
     const state = React.useRef<HTMLGameWidget>({
@@ -1121,11 +1119,6 @@ export default function GameWidget({ drag, onDragOver, onDrop, stref }: {
         requestAnimationFrame(render);
     }, [state, render]);
 
-    const dragLeave = React.useCallback((_: React.DragEvent<HTMLCanvasElement>) => {
-        state.current.useMp = false;
-        requestAnimationFrame(render);
-    }, [state, render]);
-
     useEffect(() => {
         if (stref) {
             stref(state.current);
@@ -1140,11 +1133,14 @@ export default function GameWidget({ drag, onDragOver, onDrop, stref }: {
 
     return (
         <Box className={styles.container}>
-            <canvas onDragOver={onDragOver} onDrop={onDrop} onDragLeave={dragLeave} ref={canvasElem} onPointerDown={pointerDown} onPointerUp={pointerUp} onPointerMove={pointerMove} onPointerLeave={pointerLeave}>
+            <canvas ref={r => {
+                if (typeof ref === "function") ref(r); else if (ref !== null) ref.current = r;
+                canvasElem.current = r;
+            }} onPointerDown={pointerDown} onPointerUp={pointerUp} onPointerMove={pointerMove} onPointerLeave={pointerLeave}>
                 <Typography level="body-lg">
                     Error loading canvas
                 </Typography>
             </canvas>
         </Box>
     )
-}
+});

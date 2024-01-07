@@ -35,11 +35,16 @@ export default function SandboxCard(props: {
     description: ReactNode,
     addToggled?: boolean,
     onAddClick?: MouseEventHandler<HTMLButtonElement>,
-    drop?: (s: string) => void,
+    drop?: () => void,
+    dragOver?: (e: globalThis.PointerEvent, id: string) => void,
+    dragLeave?: () => void,
+    dragFilter?: (target: HTMLElement) => boolean,
     id: string
 }) {
     const rootRef = useRef(null as HTMLDivElement | null);
     const popupRef = useRef(null as HTMLDivElement | null);
+
+    const { drop, dragOver, dragLeave, dragFilter, id } = props;
 
     const pointerDown = useCallback((e: PointerEvent<HTMLDivElement>) => {
         if (rootRef.current) {
@@ -136,12 +141,25 @@ export default function SandboxCard(props: {
                     document.body.appendChild(elem);
                     popupRef.current = elem;
 
+                    let prevFilter = false;
                     const move = (e: globalThis.PointerEvent) => {
                         if (popupRef.current) {
                             e.preventDefault();
                             removeBlur();
                             popupRef.current.style.left = (e.clientX - offsetX) + "px";
                             popupRef.current.style.top = (e.clientY - offsetY) + "px";
+                            if (typeof (dragFilter) !== 'undefined' && e.target != null) {
+                                const filter = dragFilter(e.target as HTMLElement);
+                                if (filter && typeof (dragOver) !== 'undefined') {
+                                    dragOver(e, id);
+                                }
+                                if (filter != prevFilter) {
+                                    prevFilter = filter;
+                                    if (!filter && typeof (dragLeave) !== 'undefined') {
+                                        dragLeave();
+                                    }
+                                }
+                            }
                         }
                     };
 
@@ -153,6 +171,9 @@ export default function SandboxCard(props: {
                         popupRef.current?.remove();
                         removeBlur();
                         window.removeEventListener('pointermove', move);
+                        if (typeof (drop) !== 'undefined') {
+                            drop();
+                        }
                     }, {
                         once: true,
                         passive: true
@@ -160,7 +181,7 @@ export default function SandboxCard(props: {
                 }
             }, e.pointerType === "mouse" ? 0 : 300);
         }
-    }, []);
+    }, [drop, dragLeave, dragOver, dragFilter, id]);
 
     return (<HoverCard orientation="horizontal" variant="outlined" className={styles.card} ref={rootRef} onContextMenu={e => e.preventDefault()} onPointerDown={pointerDown}>
         <CardOverflow>
