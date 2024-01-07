@@ -74,32 +74,54 @@ export default function SandboxCard(props: {
 
             let timeout: NodeJS.Timeout;
 
+            const scrolls = Array.from(document.querySelectorAll("div")).filter(m => {
+                const v = m.computedStyleMap().get("overflow-y");
+                if (typeof (v) !== 'undefined')
+                    return v.toString() === "auto";
+                return false;
+            });
+
+            const scroll = () => {
+                clearTimeout(timeout);
+                removeBlur();
+                window.removeEventListener('pointermove', tm1);
+            };
+
+            scrolls.forEach(v => v.addEventListener('scroll', scroll));
+
             const startMX = e.clientX;
             const startMY = e.clientY;
-            const tm = (e1: globalThis.PointerEvent) => {
+            const tm1 = (e1: globalThis.PointerEvent) => {
                 const dx = e1.clientX - startMX;
                 const dy = e1.clientY - startMY;
                 const delta = Math.max(dx, dy);
                 if (delta > 5) {
                     clearTimeout(timeout);
                     removeBlur();
+                    window.removeEventListener('pointermove', tm1);
+                    scrolls.forEach(v => v.removeEventListener('scroll', scroll));
                 }
             };
 
-            window.addEventListener('pointermove', tm, {
+            const tm2 = (_: globalThis.PointerEvent) => {
+                clearTimeout(timeout);
+                removeBlur();
+            };
+
+            window.addEventListener('pointermove', tm1, {
                 once: false,
                 passive: true
             });
 
-            window.addEventListener('pointerup', tm, {
+            window.addEventListener('pointerup', tm2, {
                 once: true,
                 passive: true
             });
 
             timeout = setTimeout(() => {
                 if (rootRef.current) {
-                    window.removeEventListener('pointermove', tm);
-                    window.removeEventListener('pointerup', tm);
+                    window.removeEventListener('pointermove', tm1);
+                    window.removeEventListener('pointerup', tm2);
                     const offsetX = e.clientX - bounds.x;
                     const offsetY = e.clientY - bounds.y;
                     const elem = document.createElement("div");
