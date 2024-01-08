@@ -93,6 +93,8 @@ export interface HTMLGameWidget {
     worldToPx?: (x: number, y: number) => { x: number, y: number } | null;
     nodes: GameWidgetNode[];
     forceLight?: boolean;
+    deleteMode: boolean;
+    testNode: (id: number, selected: boolean) => boolean;
 }
 
 export const mapDefaultNode = (node: GameWidgetNode): GameWidgetNode => {
@@ -240,6 +242,16 @@ export const getHandles = (state: HTMLGameWidget, node: GameWidgetNode): GameWid
         }
     }
     return [];
+};
+
+const deleteHandle = (state: HTMLGameWidget, node: GameWidgetNode, handle: GameWidgetHandle) => {
+    if (state && node.id === 6) {
+        const ind = handle.id - 2;
+        if (ind >= 0) {
+            (node as GameWidgetPolygonalTranslatingNode).px.splice(ind, 1);
+            (node as GameWidgetPolygonalTranslatingNode).py.splice(ind, 1);
+        }
+    }
 };
 
 const updateHandle = (state: HTMLGameWidget, node: GameWidgetNode, handle: GameWidgetHandle) => {
@@ -402,7 +414,16 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
         },
         addOnClickId: -1,
         dropId: -1,
-        nodes: []
+        nodes: [],
+        deleteMode: false,
+        testNode: (id, selected) => {
+            for (const node of state.current.nodes) {
+                if (node.id === id && (node.selected || !selected)) {
+                    return true;
+                }
+            }
+            return false;
+        }
     });
 
     const render = React.useCallback(() => {
@@ -1283,8 +1304,6 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                 }
             }
 
-
-
             if (!handleHover) {
                 node.selected = false;
                 if (node.hover) {
@@ -1298,6 +1317,7 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                 for (const handle of node.handles) {
                     if (handle.hover) {
                         handle.dragging = true;
+                        anySelected = true;
                         handle.xdrag = handle.x;
                         handle.ydrag = handle.y;
                     }
@@ -1305,8 +1325,13 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                 if (node.handles) {
                     for (let i = 0; i < node.handles.length; ++i) {
                         if (node.handles[i].dragging) {
-                            updateHandle(state.current, node, node.handles[i]);
-                            node.handles = getHandles(state.current, node);
+                            if (!state.current.deleteMode) {
+                                updateHandle(state.current, node, node.handles[i]);
+                                node.handles = getHandles(state.current, node);
+                            } else {
+                                deleteHandle(state.current, node, node.handles[i]);
+                                node.handles = getHandles(state.current, node);
+                            }
                         }
                     }
                 }

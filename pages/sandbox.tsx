@@ -11,6 +11,7 @@ import KeyboardDoubleArrowDownRounded from '@mui/icons-material/KeyboardDoubleAr
 import IosShareRounded from '@mui/icons-material/IosShareRounded';
 import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
+import RemoveCircleOutlineRoundedIcon from '@mui/icons-material/RemoveCircleOutlineRounded';
 import styles from "../styles/sandbox.module.css";
 import classNames from "classnames";
 import List from "@mui/joy/List";
@@ -36,6 +37,8 @@ export default function Sandbox() {
     const [showShareDialog, setShowShareDialog] = React.useState(false);
     const [forceLightMode, setForceLightMode] = React.useState(false);
     const [nodeSelected, setNodeSelected] = React.useState(false);
+    const [polygonNodeSelected, setPolygonNodeSelected] = React.useState(false);
+    const [polygonDelete, setPolygonDelete] = React.useState(false);
 
     const shareUrlInput = React.useRef(null as HTMLInputElement | null);
 
@@ -202,7 +205,18 @@ export default function Sandbox() {
                     height: 'calc(100vh - 60px)'
                 }}>
                     <div style={{ height: '100%', backgroundColor: forceLightMode ? '#fff' : undefined }}>
-                        <GameWidget drag stref={(o) => widget.current = o} ref={widgetCv} onNodeSelect={() => setNodeSelected(true)} onNodeSelectionClear={() => setNodeSelected(false)} />
+                        <GameWidget drag stref={(o) => widget.current = o} ref={widgetCv}
+                            onNodeSelect={() => {
+                                setNodeSelected(true);
+                                if (widget.current && widget.current.testNode(6, true))
+                                    setPolygonNodeSelected(true);
+                                else
+                                    setPolygonNodeSelected(false);
+                            }}
+                            onNodeSelectionClear={() => {
+                                setNodeSelected(false);
+                                setPolygonNodeSelected(false);
+                            }} />
                     </div>
                     <IconButton variant="plain" size="md" tabIndex={0} aria-label="Open drawer" onClick={() => setOpen(!open)} sx={{
                         position: 'fixed',
@@ -225,13 +239,33 @@ export default function Sandbox() {
                     }} className={classNames(styles.openBtn, { [styles.show]: !open })}>
                         <KeyboardDoubleArrowUpRounded />
                     </IconButton>
+                    {polygonNodeSelected ?
+                        <Tooltip title={
+                            <>
+                                Toggle polygon delete mode
+                            </>
+                        } arrow placement="bottom" variant="outlined">
+                            <IconButton color="danger" variant={polygonDelete ? "solid" : "plain"} size="md" tabIndex={1} aria-label={polygonDelete ? "Disable polygon delete mode" : "Enable polygon delete mode"} sx={{
+                                position: 'fixed',
+                                right: '125px',
+                                top: '65px',
+                            }} onClick={() => {
+                                setPolygonDelete(!polygonDelete);
+                                if (widget.current) {
+                                    widget.current.deleteMode = !polygonDelete;
+                                }
+                            }}>
+                                <RemoveCircleOutlineRoundedIcon />
+                            </IconButton>
+                        </Tooltip>
+                        : null}
                     {nodeSelected ?
                         <Tooltip title={
                             <>
                                 Delete selected node
                             </>
                         } arrow placement="bottom" variant="outlined">
-                            <IconButton color="danger" variant="plain" size="md" tabIndex={1} aria-label="Delete selected node" sx={{
+                            <IconButton color="danger" variant="plain" size="md" tabIndex={2} aria-label="Delete selected node" sx={{
                                 position: 'fixed',
                                 right: '85px',
                                 top: '65px',
@@ -257,7 +291,7 @@ export default function Sandbox() {
                             Toggle forced light mode
                         </>
                     } arrow placement="bottom" variant="outlined">
-                        <IconButton variant={forceLightMode ? "solid" : "plain"} size="md" tabIndex={2} aria-label={forceLightMode ? "Disable forced light mode" : "Enable forced light mode"} sx={{
+                        <IconButton variant={forceLightMode ? "solid" : "plain"} size="md" tabIndex={3} aria-label={forceLightMode ? "Disable forced light mode" : "Enable forced light mode"} sx={{
                             position: 'fixed',
                             right: '45px',
                             top: '65px',
@@ -277,7 +311,7 @@ export default function Sandbox() {
                             Share this simulation
                         </>
                     } arrow placement="bottom" variant="outlined">
-                        <IconButton variant="plain" size="md" tabIndex={3} aria-label="Share this simulation" sx={{
+                        <IconButton variant="plain" size="md" tabIndex={4} aria-label="Share this simulation" sx={{
                             position: 'fixed',
                             right: '5px',
                             top: '65px',
