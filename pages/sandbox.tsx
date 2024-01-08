@@ -10,6 +10,7 @@ import KeyboardDoubleArrowUpRounded from '@mui/icons-material/KeyboardDoubleArro
 import KeyboardDoubleArrowDownRounded from '@mui/icons-material/KeyboardDoubleArrowDownRounded';
 import IosShareRounded from '@mui/icons-material/IosShareRounded';
 import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
+import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import styles from "../styles/sandbox.module.css";
 import classNames from "classnames";
 import List from "@mui/joy/List";
@@ -34,6 +35,7 @@ export default function Sandbox() {
     const [copyBtnCopied, setCopyBtnCopied] = React.useState(false);
     const [showShareDialog, setShowShareDialog] = React.useState(false);
     const [forceLightMode, setForceLightMode] = React.useState(false);
+    const [nodeSelected, setNodeSelected] = React.useState(false);
 
     const shareUrlInput = React.useRef(null as HTMLInputElement | null);
 
@@ -42,6 +44,31 @@ export default function Sandbox() {
     if (widget.current) {
         widget.current.addOnClickId = currentAdd;
     }
+
+    // add key press listener to widget
+    React.useEffect(() => {
+        if (widgetCv.current) {
+            const listener = (e: KeyboardEvent) => {
+                if (e.key === 'Backspace') {
+                    if (widget.current) {
+                        for (let i = widget.current.nodes.length - 1; i >= 0; i--) {
+                            if (widget.current.nodes[i].selected) {
+                                widget.current.nodes.splice(i, 1);
+                            }
+                        }
+                        if (widget.current.updateSelection)
+                            widget.current.updateSelection();
+                        if (widget.current.render)
+                            requestAnimationFrame(widget.current.render);
+                    }
+                }
+            };
+            window.addEventListener('keydown', listener);
+            return () => {
+                window.removeEventListener('keydown', listener);
+            }
+        }
+    }, []);
 
     // load query simulation
     React.useEffect(() => {
@@ -70,6 +97,8 @@ export default function Sandbox() {
                 });
                 node.handles = getHandles(widget.current, node);
                 widget.current.nodes.push(node);
+                if (widget.current.updateSelection)
+                    widget.current.updateSelection();
             }
             widget.current.dropId = -1;
             if (widget.current.render)
@@ -173,7 +202,7 @@ export default function Sandbox() {
                     height: 'calc(100vh - 60px)'
                 }}>
                     <div style={{ height: '100%', backgroundColor: forceLightMode ? '#fff' : undefined }}>
-                        <GameWidget drag stref={(o) => widget.current = o} ref={widgetCv} />
+                        <GameWidget drag stref={(o) => widget.current = o} ref={widgetCv} onNodeSelect={() => setNodeSelected(true)} onNodeSelectionClear={() => setNodeSelected(false)} />
                     </div>
                     <IconButton variant="plain" size="md" tabIndex={0} aria-label="Open drawer" onClick={() => setOpen(!open)} sx={{
                         position: 'fixed',
@@ -196,12 +225,39 @@ export default function Sandbox() {
                     }} className={classNames(styles.openBtn, { [styles.show]: !open })}>
                         <KeyboardDoubleArrowUpRounded />
                     </IconButton>
+                    {nodeSelected ?
+                        <Tooltip title={
+                            <>
+                                Delete selected node
+                            </>
+                        } arrow placement="bottom" variant="outlined">
+                            <IconButton color="danger" variant="plain" size="md" tabIndex={1} aria-label="Delete selected node" sx={{
+                                position: 'fixed',
+                                right: '85px',
+                                top: '65px',
+                            }} onClick={() => {
+                                if (widget.current) {
+                                    for (let i = widget.current.nodes.length - 1; i >= 0; i--) {
+                                        if (widget.current.nodes[i].selected) {
+                                            widget.current.nodes.splice(i, 1);
+                                        }
+                                    }
+                                    if (widget.current.updateSelection)
+                                        widget.current.updateSelection();
+                                    if (widget.current.render)
+                                        requestAnimationFrame(widget.current.render);
+                                }
+                            }}>
+                                <DeleteRoundedIcon />
+                            </IconButton>
+                        </Tooltip>
+                        : null}
                     <Tooltip title={
                         <>
                             Toggle forced light mode
                         </>
                     } arrow placement="bottom" variant="outlined">
-                        <IconButton variant={forceLightMode ? "solid" : "plain"} size="md" tabIndex={1} aria-label={forceLightMode ? "Disable forced light mode" : "Enable forced light mode"} sx={{
+                        <IconButton variant={forceLightMode ? "solid" : "plain"} size="md" tabIndex={2} aria-label={forceLightMode ? "Disable forced light mode" : "Enable forced light mode"} sx={{
                             position: 'fixed',
                             right: '45px',
                             top: '65px',
@@ -221,7 +277,7 @@ export default function Sandbox() {
                             Share this simulation
                         </>
                     } arrow placement="bottom" variant="outlined">
-                        <IconButton variant="plain" size="md" tabIndex={2} aria-label="Share this simulation" sx={{
+                        <IconButton variant="plain" size="md" tabIndex={3} aria-label="Share this simulation" sx={{
                             position: 'fixed',
                             right: '5px',
                             top: '65px',

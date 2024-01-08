@@ -88,6 +88,7 @@ export interface HTMLGameWidget {
     addOnClickId: number;
     dropId: number;
     render?: () => void;
+    updateSelection?: () => void;
     pxToWorld?: (x: number, y: number) => { x: number, y: number } | null;
     worldToPx?: (x: number, y: number) => { x: number, y: number } | null;
     nodes: GameWidgetNode[];
@@ -372,11 +373,14 @@ const updateHandle = (state: HTMLGameWidget, node: GameWidgetNode, handle: GameW
     }
 };
 
-export default React.forwardRef(function GameWidget({ drag, stref }: {
+export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect, onNodeSelectionClear }: {
     drag?: boolean,
-    stref?: (o: HTMLGameWidget | null) => any | undefined
+    stref?: (o: HTMLGameWidget | null) => any | undefined,
+    onNodeSelect?: () => void,
+    onNodeSelectionClear?: () => void
 }, ref: React.ForwardedRef<HTMLCanvasElement>) {
     const canvasElem = React.useRef(null as HTMLCanvasElement | null);
+    const hadSelection = React.useRef(false);
     const { mode, systemMode } = useColorScheme();
     const state = React.useRef<HTMLGameWidget>({
         drag: false,
@@ -1192,6 +1196,24 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
 
             return null;
         };
+        state.current.updateSelection = () => {
+            let anySelected = false;
+            for (const node of state.current.nodes) {
+                if (node.selected) {
+                    anySelected = true;
+                    break;
+                }
+            }
+            if (anySelected && !hadSelection.current) {
+                hadSelection.current = true;
+                if (typeof (onNodeSelect) === 'function')
+                    onNodeSelect();
+            } else if (!anySelected && hadSelection.current) {
+                hadSelection.current = false;
+                if (typeof (onNodeSelectionClear) === 'function')
+                    onNodeSelectionClear();
+            }
+        };
     }, [render]);
 
     useEffect(() => {
@@ -1231,6 +1253,8 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
         state.current.startDragX = state.current.bounds.left;
         state.current.startDragY = state.current.bounds.bottom;
 
+        let anySelected = false;
+
         for (const node of state.current.nodes) {
             node.hover = false;
             let handleHover = false;
@@ -1259,10 +1283,13 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                 }
             }
 
+
+
             if (!handleHover) {
                 node.selected = false;
                 if (node.hover) {
                     node.selected = true;
+                    anySelected = true;
                     node.dragging = true;
                     node.xdrag = node.x;
                     node.ydrag = node.y;
@@ -1283,6 +1310,18 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                         }
                     }
                 }
+            }
+        }
+
+        if (anySelected && !hadSelection.current) {
+            hadSelection.current = true;
+            if (typeof (onNodeSelect) === 'function') {
+                onNodeSelect();
+            }
+        } else if (!anySelected && hadSelection.current) {
+            hadSelection.current = false;
+            if (typeof (onNodeSelectionClear) === 'function') {
+                onNodeSelectionClear();
             }
         }
 
