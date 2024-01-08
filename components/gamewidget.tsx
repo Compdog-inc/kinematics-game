@@ -88,9 +88,13 @@ export interface HTMLGameWidget {
     addOnClickId: number;
     dropId: number;
     render?: () => void;
+    updateSelection?: () => void;
     pxToWorld?: (x: number, y: number) => { x: number, y: number } | null;
     worldToPx?: (x: number, y: number) => { x: number, y: number } | null;
     nodes: GameWidgetNode[];
+    forceLight?: boolean;
+    deleteMode: boolean;
+    testNode: (id: number, selected: boolean) => boolean;
 }
 
 export const mapDefaultNode = (node: GameWidgetNode): GameWidgetNode => {
@@ -240,6 +244,16 @@ export const getHandles = (state: HTMLGameWidget, node: GameWidgetNode): GameWid
     return [];
 };
 
+const deleteHandle = (state: HTMLGameWidget, node: GameWidgetNode, handle: GameWidgetHandle) => {
+    if (state && node.id === 6) {
+        const ind = handle.id - 2;
+        if (ind >= 0) {
+            (node as GameWidgetPolygonalTranslatingNode).px.splice(ind, 1);
+            (node as GameWidgetPolygonalTranslatingNode).py.splice(ind, 1);
+        }
+    }
+};
+
 const updateHandle = (state: HTMLGameWidget, node: GameWidgetNode, handle: GameWidgetHandle) => {
     if (state.worldToPx && state.pxToWorld) {
         const px = state.worldToPx(node.x, node.y);
@@ -371,11 +385,14 @@ const updateHandle = (state: HTMLGameWidget, node: GameWidgetNode, handle: GameW
     }
 };
 
-export default React.forwardRef(function GameWidget({ drag, stref }: {
+export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect, onNodeSelectionClear }: {
     drag?: boolean,
-    stref?: (o: HTMLGameWidget | null) => any | undefined
+    stref?: (o: HTMLGameWidget | null) => any | undefined,
+    onNodeSelect?: () => void,
+    onNodeSelectionClear?: () => void
 }, ref: React.ForwardedRef<HTMLCanvasElement>) {
     const canvasElem = React.useRef(null as HTMLCanvasElement | null);
+    const hadSelection = React.useRef(false);
     const { mode, systemMode } = useColorScheme();
     const state = React.useRef<HTMLGameWidget>({
         drag: false,
@@ -397,7 +414,16 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
         },
         addOnClickId: -1,
         dropId: -1,
-        nodes: []
+        nodes: [],
+        deleteMode: false,
+        testNode: (id, selected) => {
+            for (const node of state.current.nodes) {
+                if (node.id === id && (node.selected || !selected)) {
+                    return true;
+                }
+            }
+            return false;
+        }
     });
 
     const render = React.useCallback(() => {
@@ -451,10 +477,10 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
             };
 
             // draw grid @x2
-            drawGrid(0.5, state.current.theme === 'dark' ? '#212126' : '#ebebfa');
+            drawGrid(0.5, (state.current.theme === 'dark' && !state.current.forceLight) ? '#212126' : '#ebebfa');
 
             // draw grid @x1
-            drawGrid(1, state.current.theme === 'dark' ? '#28272e' : '#d5d5eb');
+            drawGrid(1, (state.current.theme === 'dark' && !state.current.forceLight) ? '#28272e' : '#d5d5eb');
 
             // draw axis
             if (state.current.worldToPx) {
@@ -466,7 +492,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                     ctx.moveTo(0, ax0.y);
                     ctx.lineTo(ctx.canvas.width, ax0.y);
                 }
-                ctx.strokeStyle = state.current.theme === 'dark' ? '#42434d' : '#86869e';
+                ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#42434d' : '#86869e';
                 ctx.lineWidth = 4;
                 ctx.stroke();
             }
@@ -474,7 +500,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
             // draw model nodes
             if (state.current.worldToPx) {
                 for (const node of state.current.nodes) {
-                    const mainColor = state.current.theme === 'dark' ? (node.hover ? '#cacfed' : '#fff') : (node.hover ? '#404252' : '#000');
+                    const mainColor = (state.current.theme === 'dark' && !state.current.forceLight) ? (node.hover ? '#cacfed' : '#fff') : (node.hover ? '#404252' : '#000');
                     switch (node.id) {
                         case 0: // fixed node
                             {
@@ -549,7 +575,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                     ctx.moveTo(x8, y8);
                                     ctx.lineTo(x10, y10);
                                     ctx.lineCap = "round";
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#858699' : '#595966';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#858699' : '#595966';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                     ctx.lineCap = "butt";
@@ -661,7 +687,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                     ctx.moveTo(px1.x, px1.y);
                                     ctx.lineTo(px2.x, px2.y);
                                     ctx.lineCap = "round";
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#858699' : '#595966';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#858699' : '#595966';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                     ctx.lineCap = "butt";
@@ -713,7 +739,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                     ctx.beginPath();
                                     ctx.ellipse(cp.x, cp.y, rx, ry, 0, -max, -min, false);
                                     ctx.lineCap = "round";
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#858699' : '#595966';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#858699' : '#595966';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                     ctx.lineCap = "butt";
@@ -788,7 +814,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                     ctx.lineCap = "round";
                                     const join = ctx.lineJoin;
                                     ctx.lineJoin = "round";
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#858699' : '#595966';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#858699' : '#595966';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                     ctx.lineCap = "butt";
@@ -893,7 +919,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                 if (px) {
                                     ctx.beginPath();
                                     ctx.ellipse(px.x, px.y, 10, 10, 0, 0, Math.PI * 2);
-                                    ctx.fillStyle = state.current.theme === 'dark' ? '#fff' : '#000';
+                                    ctx.fillStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#fff' : '#000';
                                     ctx.fill();
                                 }
                             }
@@ -904,7 +930,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                 if (px) {
                                     ctx.beginPath();
                                     ctx.ellipse(px.x, px.y, 20, 20, 0, 0, Math.PI * 2);
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#fff' : '#000';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#fff' : '#000';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                 }
@@ -948,7 +974,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                     ctx.moveTo(x8, y8);
                                     ctx.lineTo(x10, y10);
                                     ctx.lineCap = "round";
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#858699' : '#595966';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#858699' : '#595966';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                     ctx.lineCap = "butt";
@@ -965,7 +991,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                             ctx.lineTo(x, y);
                                     }
                                     ctx.closePath();
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#fff' : '#000';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#fff' : '#000';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                 }
@@ -977,12 +1003,12 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                 if (px) {
                                     ctx.beginPath();
                                     ctx.ellipse(px.x, px.y, 10, 10, 0, 0, Math.PI * 2);
-                                    ctx.fillStyle = state.current.theme === 'dark' ? '#fff' : '#000';
+                                    ctx.fillStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#fff' : '#000';
                                     ctx.fill();
 
                                     ctx.beginPath();
                                     ctx.ellipse(px.x, px.y, 20, 20, 0, 0, Math.PI * 2);
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#fff' : '#000';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#fff' : '#000';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                 }
@@ -1000,7 +1026,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                     ctx.moveTo(px1.x, px1.y);
                                     ctx.lineTo(px2.x, px2.y);
                                     ctx.lineCap = "round";
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#858699' : '#595966';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#858699' : '#595966';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                     ctx.lineCap = "butt";
@@ -1017,7 +1043,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                             ctx.lineTo(x, y);
                                     }
                                     ctx.closePath();
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#fff' : '#000';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#fff' : '#000';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                 }
@@ -1039,7 +1065,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                     ctx.beginPath();
                                     ctx.ellipse(cp.x, cp.y, rx, ry, 0, -min, max, true);
                                     ctx.lineCap = "round";
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#858699' : '#595966';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#858699' : '#595966';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                     ctx.lineCap = "butt";
@@ -1056,7 +1082,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                             ctx.lineTo(x, y);
                                     }
                                     ctx.closePath();
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#fff' : '#000';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#fff' : '#000';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                 }
@@ -1082,7 +1108,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                     ctx.lineCap = "round";
                                     const join = ctx.lineJoin;
                                     ctx.lineJoin = "round";
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#858699' : '#595966';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#858699' : '#595966';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                     ctx.lineCap = "butt";
@@ -1100,7 +1126,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                             ctx.lineTo(x, y);
                                     }
                                     ctx.closePath();
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#fff' : '#000';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#fff' : '#000';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                 }
@@ -1191,6 +1217,28 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
 
             return null;
         };
+        state.current.updateSelection = () => {
+            let anySelected = false;
+            for (const node of state.current.nodes) {
+                if (node.selected) {
+                    anySelected = true;
+                    break;
+                }
+            }
+            if (anySelected && !hadSelection.current) {
+                hadSelection.current = true;
+            } else if (!anySelected && hadSelection.current) {
+                hadSelection.current = false;
+                if (typeof (onNodeSelectionClear) === 'function')
+                    onNodeSelectionClear();
+            }
+
+            // Workaround for custom node selection updates
+            if (anySelected) {
+                if (typeof (onNodeSelect) === 'function')
+                    onNodeSelect();
+            }
+        };
     }, [render]);
 
     useEffect(() => {
@@ -1230,6 +1278,8 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
         state.current.startDragX = state.current.bounds.left;
         state.current.startDragY = state.current.bounds.bottom;
 
+        let anySelected = false;
+
         for (const node of state.current.nodes) {
             node.hover = false;
             let handleHover = false;
@@ -1262,6 +1312,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                 node.selected = false;
                 if (node.hover) {
                     node.selected = true;
+                    anySelected = true;
                     node.dragging = true;
                     node.xdrag = node.x;
                     node.ydrag = node.y;
@@ -1270,6 +1321,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                 for (const handle of node.handles) {
                     if (handle.hover) {
                         handle.dragging = true;
+                        anySelected = true;
                         handle.xdrag = handle.x;
                         handle.ydrag = handle.y;
                     }
@@ -1277,11 +1329,32 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                 if (node.handles) {
                     for (let i = 0; i < node.handles.length; ++i) {
                         if (node.handles[i].dragging) {
-                            updateHandle(state.current, node, node.handles[i]);
-                            node.handles = getHandles(state.current, node);
+                            if (!state.current.deleteMode) {
+                                updateHandle(state.current, node, node.handles[i]);
+                                node.handles = getHandles(state.current, node);
+                            } else {
+                                deleteHandle(state.current, node, node.handles[i]);
+                                node.handles = getHandles(state.current, node);
+                            }
                         }
                     }
                 }
+            }
+        }
+
+        if (anySelected && !hadSelection.current) {
+            hadSelection.current = true;
+        } else if (!anySelected && hadSelection.current) {
+            hadSelection.current = false;
+            if (typeof (onNodeSelectionClear) === 'function') {
+                onNodeSelectionClear();
+            }
+        }
+
+        // Workaround for custom node selection updates
+        if (anySelected) {
+            if (typeof (onNodeSelect) === 'function') {
+                onNodeSelect();
             }
         }
 
