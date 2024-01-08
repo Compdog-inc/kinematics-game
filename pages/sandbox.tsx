@@ -3,7 +3,7 @@ import GameWidget, { HTMLGameWidget, mapDefaultNode, getHandles } from "../compo
 import Box from "@mui/joy/Box";
 import Drawer from "@mui/joy/Drawer";
 import IconButton from "@mui/joy/IconButton";
-import React, { useEffect } from "react";
+import React from "react";
 import KeyboardDoubleArrowLeftRounded from '@mui/icons-material/KeyboardDoubleArrowLeftRounded';
 import KeyboardDoubleArrowRightRounded from '@mui/icons-material/KeyboardDoubleArrowRightRounded';
 import KeyboardDoubleArrowUpRounded from '@mui/icons-material/KeyboardDoubleArrowUpRounded';
@@ -24,6 +24,7 @@ import CardContent from "@mui/joy/CardContent";
 import Typography from "@mui/joy/Typography";
 import Input from "@mui/joy/Input";
 import Button from "@mui/joy/Button";
+import { fromSimulationUrl, toSimulationUrl } from "../utils/serializer";
 
 export default function Sandbox() {
     const [open, setOpen] = React.useState(true);
@@ -34,15 +35,23 @@ export default function Sandbox() {
 
     const shareUrlInput = React.useRef(null as HTMLInputElement | null);
 
-    useEffect(() => {
-        setShareUrl(location.href + "?b=hello");
-    }, []);
-
     const widget = React.useRef(null as HTMLGameWidget | null);
     const widgetCv = React.useRef(null as HTMLCanvasElement | null);
     if (widget.current) {
         widget.current.addOnClickId = currentAdd;
     }
+
+    // load query simulation
+    React.useEffect(() => {
+        const url = new URL(location.href);
+        if (url.searchParams.has("b") && widget.current) {
+            const encoded = decodeURIComponent(url.searchParams.get("b") || "");
+            toSimulationUrl(encoded, widget.current).then(() => {
+                if (widget.current && widget.current.render)
+                    requestAnimationFrame(widget.current.render);
+            });
+        }
+    }, []);
 
     const setDropTransfer = React.useCallback(() => {
         if (widget.current) {
@@ -193,7 +202,15 @@ export default function Sandbox() {
                             right: '5px',
                             top: '65px',
                             zIndex: '2'
-                        }} onClick={() => { setShowShareDialog(true); setCopyBtnCopied(false); }}>
+                        }} onClick={() => {
+                            if (widget.current) {
+                                fromSimulationUrl(widget.current).then((b) => {
+                                    setShareUrl(location.origin + location.pathname + "?b=" + encodeURIComponent(b));
+                                    setShowShareDialog(true);
+                                    setCopyBtnCopied(false);
+                                });
+                            }
+                        }}>
                             <IosShareRounded />
                         </IconButton>
                     </Tooltip>
