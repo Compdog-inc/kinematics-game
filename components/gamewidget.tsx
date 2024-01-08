@@ -127,8 +127,8 @@ export const mapDefaultNode = (node: GameWidgetNode): GameWidgetNode => {
             (node as GameWidgetArcTranslatingNode).delta = 0;
             break;
         case 6: // polygonal translating node
-            (node as GameWidgetPolygonalTranslatingNode).px = [-1, -.5, 0, .5, 1];
-            (node as GameWidgetPolygonalTranslatingNode).py = [0, -.6, 0, -.6, 0];
+            (node as GameWidgetPolygonalTranslatingNode).px = [node.x + -1, node.x + -.5, node.x + 0, node.x + .5, node.x + 1];
+            (node as GameWidgetPolygonalTranslatingNode).py = [node.y + 0, node.y + -.6, node.y + 0, node.y + -.6, node.y + 0];
             (node as GameWidgetPolygonalTranslatingNode).delta = .5;
             break;
     }
@@ -206,7 +206,7 @@ export const getHandles = (state: HTMLGameWidget, node: GameWidgetNode): GameWid
                     let pointHandles: GameWidgetHandle[] = [];
 
                     if (tmp.px.length > 0) {
-                        const wpx0 = state.worldToPx(tmp.px[0] + node.x, tmp.py[0] + node.y);
+                        const wpx0 = state.worldToPx(tmp.px[0], tmp.py[0]);
                         if (wpx0) {
                             const firstAngle = tmp.px.length > 1 ? Math.atan2(tmp.py[0] - tmp.py[1], tmp.px[0] - tmp.px[1]) : 0;
                             pointHandles.push(
@@ -217,7 +217,7 @@ export const getHandles = (state: HTMLGameWidget, node: GameWidgetNode): GameWid
                         }
 
                         if (tmp.px.length > 1) {
-                            const wpx1 = state.worldToPx(tmp.px[tmp.px.length - 1] + node.x, tmp.py[tmp.py.length - 1] + node.y);
+                            const wpx1 = state.worldToPx(tmp.px[tmp.px.length - 1], tmp.py[tmp.py.length - 1]);
                             if (wpx1) {
                                 const lastAngle = Math.atan2(tmp.py[tmp.py.length - 1] - tmp.py[tmp.py.length - 2], tmp.px[tmp.px.length - 1] - tmp.px[tmp.px.length - 2]);
                                 pointHandles.push(
@@ -232,7 +232,7 @@ export const getHandles = (state: HTMLGameWidget, node: GameWidgetNode): GameWid
                     let startInd = node.handles ? node.handles.findIndex((v => v.id === 2)) : -1;
 
                     for (let i = 0; i < tmp.px.length; i++) {
-                        const wpx = state.worldToPx(tmp.px[i] + node.x, tmp.py[i] + node.y);
+                        const wpx = state.worldToPx(tmp.px[i], tmp.py[i]);
                         if (wpx) {
                             pointHandles.push(Object.assign(startInd === -1 || !node.handles ? {} : node.handles[startInd + i], { id: 2 + i, x: wpx.x, y: wpx.y }));
                         }
@@ -350,8 +350,8 @@ const updateHandle = (state: HTMLGameWidget, node: GameWidgetNode, handle: GameW
                         const tmp = (node as GameWidgetPolygonalTranslatingNode);
                         const wd = state.pxToWorld(handle.x, handle.y);
                         if (wd) {
-                            const x = wd.x - tmp.x;
-                            const y = wd.y - tmp.y;
+                            const x = wd.x;
+                            const y = wd.y;
                             if (handle.id === 0) {
                                 tmp.px.unshift(x);
                                 tmp.py.unshift(y);
@@ -803,7 +803,7 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                                 if (px) {
                                     ctx.beginPath();
                                     for (let i = 0; i < tmp.px.length; i++) {
-                                        const wpx = state.current.worldToPx(tmp.px[i] + node.x, tmp.py[i] + node.y);
+                                        const wpx = state.current.worldToPx(tmp.px[i], tmp.py[i]);
                                         if (wpx) {
                                             if (i === 0)
                                                 ctx.moveTo(wpx.x, wpx.y);
@@ -838,7 +838,7 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
 
                                     if (node.selected) {
                                         for (let i = 0; i < tmp.px.length; i++) {
-                                            const wpx = state.current.worldToPx(tmp.px[i] + node.x, tmp.py[i] + node.y);
+                                            const wpx = state.current.worldToPx(tmp.px[i], tmp.py[i]);
                                             if (wpx) {
                                                 ctx.beginPath();
                                                 ctx.ellipse(wpx.x, wpx.y, 30, 30, 0, 0, Math.PI * 2);
@@ -849,7 +849,7 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
 
                                         if (tmp.px.length > 0) {
                                             // render extend handles
-                                            const wpx0 = state.current.worldToPx(tmp.px[0] + node.x, tmp.py[0] + node.y);
+                                            const wpx0 = state.current.worldToPx(tmp.px[0], tmp.py[0]);
                                             if (wpx0) {
                                                 const firstAngle = tmp.px.length > 1 ? Math.atan2(tmp.py[0] - tmp.py[1], tmp.px[0] - tmp.px[1]) : 0;
                                                 ctx.beginPath();
@@ -875,7 +875,7 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                                             }
 
                                             if (tmp.px.length > 1) {
-                                                const wpx1 = state.current.worldToPx(tmp.px[tmp.px.length - 1] + node.x, tmp.py[tmp.py.length - 1] + node.y);
+                                                const wpx1 = state.current.worldToPx(tmp.px[tmp.px.length - 1], tmp.py[tmp.py.length - 1]);
                                                 if (wpx1) {
                                                     const lastAngle = Math.atan2(tmp.py[tmp.py.length - 1] - tmp.py[tmp.py.length - 2], tmp.px[tmp.px.length - 1] - tmp.px[tmp.px.length - 2]);
                                                     ctx.beginPath();
@@ -1316,6 +1316,12 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                     node.dragging = true;
                     node.xdrag = node.x;
                     node.ydrag = node.y;
+
+                    if (node.id === 6) // polygonal translating
+                    {
+                        (node as any).pxi = Array.from((node as any).px);
+                        (node as any).pyi = Array.from((node as any).py);
+                    }
                 }
             } else if (node.handles) {
                 for (const handle of node.handles) {
@@ -1447,6 +1453,15 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                         fallthrough = false;
                         node.x = node.xdrag + wdx * Math.max(1, aspectScreen);
                         node.y = node.ydrag + wdy / Math.min(1, aspectScreen);
+
+                        if (node.id === 6) // polygonal translating
+                        {
+                            for (let k = 0; k < (node as GameWidgetPolygonalTranslatingNode).px.length; k++) {
+                                (node as GameWidgetPolygonalTranslatingNode).px[k] = (node as any).pxi[k] + wdx * Math.max(1, aspectScreen);
+                                (node as GameWidgetPolygonalTranslatingNode).py[k] = (node as any).pyi[k] + wdy / Math.min(1, aspectScreen);
+                            }
+                        }
+
                         node.handles = getHandles(state.current, node);
                     } else if (node.handles) {
                         for (let i = 0; i < node.handles.length; ++i) {
