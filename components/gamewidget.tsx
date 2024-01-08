@@ -91,6 +91,7 @@ export interface HTMLGameWidget {
     pxToWorld?: (x: number, y: number) => { x: number, y: number } | null;
     worldToPx?: (x: number, y: number) => { x: number, y: number } | null;
     nodes: GameWidgetNode[];
+    forceLight?: boolean;
 }
 
 export const mapDefaultNode = (node: GameWidgetNode): GameWidgetNode => {
@@ -451,10 +452,10 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
             };
 
             // draw grid @x2
-            drawGrid(0.5, state.current.theme === 'dark' ? '#212126' : '#ebebfa');
+            drawGrid(0.5, (state.current.theme === 'dark' && !state.current.forceLight) ? '#212126' : '#ebebfa');
 
             // draw grid @x1
-            drawGrid(1, state.current.theme === 'dark' ? '#28272e' : '#d5d5eb');
+            drawGrid(1, (state.current.theme === 'dark' && !state.current.forceLight) ? '#28272e' : '#d5d5eb');
 
             // draw axis
             if (state.current.worldToPx) {
@@ -466,7 +467,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                     ctx.moveTo(0, ax0.y);
                     ctx.lineTo(ctx.canvas.width, ax0.y);
                 }
-                ctx.strokeStyle = state.current.theme === 'dark' ? '#42434d' : '#86869e';
+                ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#42434d' : '#86869e';
                 ctx.lineWidth = 4;
                 ctx.stroke();
             }
@@ -474,7 +475,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
             // draw model nodes
             if (state.current.worldToPx) {
                 for (const node of state.current.nodes) {
-                    const mainColor = state.current.theme === 'dark' ? (node.hover ? '#cacfed' : '#fff') : (node.hover ? '#404252' : '#000');
+                    const mainColor = (state.current.theme === 'dark' && !state.current.forceLight) ? (node.hover ? '#cacfed' : '#fff') : (node.hover ? '#404252' : '#000');
                     switch (node.id) {
                         case 0: // fixed node
                             {
@@ -549,7 +550,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                     ctx.moveTo(x8, y8);
                                     ctx.lineTo(x10, y10);
                                     ctx.lineCap = "round";
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#858699' : '#595966';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#858699' : '#595966';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                     ctx.lineCap = "butt";
@@ -661,7 +662,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                     ctx.moveTo(px1.x, px1.y);
                                     ctx.lineTo(px2.x, px2.y);
                                     ctx.lineCap = "round";
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#858699' : '#595966';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#858699' : '#595966';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                     ctx.lineCap = "butt";
@@ -713,7 +714,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                     ctx.beginPath();
                                     ctx.ellipse(cp.x, cp.y, rx, ry, 0, -max, -min, false);
                                     ctx.lineCap = "round";
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#858699' : '#595966';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#858699' : '#595966';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                     ctx.lineCap = "butt";
@@ -788,7 +789,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                     ctx.lineCap = "round";
                                     const join = ctx.lineJoin;
                                     ctx.lineJoin = "round";
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#858699' : '#595966';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#858699' : '#595966';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                     ctx.lineCap = "butt";
@@ -893,7 +894,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                 if (px) {
                                     ctx.beginPath();
                                     ctx.ellipse(px.x, px.y, 10, 10, 0, 0, Math.PI * 2);
-                                    ctx.fillStyle = state.current.theme === 'dark' ? '#fff' : '#000';
+                                    ctx.fillStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#fff' : '#000';
                                     ctx.fill();
                                 }
                             }
@@ -904,7 +905,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                 if (px) {
                                     ctx.beginPath();
                                     ctx.ellipse(px.x, px.y, 20, 20, 0, 0, Math.PI * 2);
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#fff' : '#000';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#fff' : '#000';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                 }
@@ -948,7 +949,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                     ctx.moveTo(x8, y8);
                                     ctx.lineTo(x10, y10);
                                     ctx.lineCap = "round";
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#858699' : '#595966';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#858699' : '#595966';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                     ctx.lineCap = "butt";
@@ -965,7 +966,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                             ctx.lineTo(x, y);
                                     }
                                     ctx.closePath();
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#fff' : '#000';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#fff' : '#000';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                 }
@@ -977,12 +978,12 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                 if (px) {
                                     ctx.beginPath();
                                     ctx.ellipse(px.x, px.y, 10, 10, 0, 0, Math.PI * 2);
-                                    ctx.fillStyle = state.current.theme === 'dark' ? '#fff' : '#000';
+                                    ctx.fillStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#fff' : '#000';
                                     ctx.fill();
 
                                     ctx.beginPath();
                                     ctx.ellipse(px.x, px.y, 20, 20, 0, 0, Math.PI * 2);
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#fff' : '#000';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#fff' : '#000';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                 }
@@ -1000,7 +1001,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                     ctx.moveTo(px1.x, px1.y);
                                     ctx.lineTo(px2.x, px2.y);
                                     ctx.lineCap = "round";
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#858699' : '#595966';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#858699' : '#595966';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                     ctx.lineCap = "butt";
@@ -1017,7 +1018,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                             ctx.lineTo(x, y);
                                     }
                                     ctx.closePath();
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#fff' : '#000';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#fff' : '#000';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                 }
@@ -1039,7 +1040,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                     ctx.beginPath();
                                     ctx.ellipse(cp.x, cp.y, rx, ry, 0, -min, max, true);
                                     ctx.lineCap = "round";
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#858699' : '#595966';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#858699' : '#595966';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                     ctx.lineCap = "butt";
@@ -1056,7 +1057,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                             ctx.lineTo(x, y);
                                     }
                                     ctx.closePath();
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#fff' : '#000';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#fff' : '#000';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                 }
@@ -1082,7 +1083,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                     ctx.lineCap = "round";
                                     const join = ctx.lineJoin;
                                     ctx.lineJoin = "round";
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#858699' : '#595966';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#858699' : '#595966';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                     ctx.lineCap = "butt";
@@ -1100,7 +1101,7 @@ export default React.forwardRef(function GameWidget({ drag, stref }: {
                                             ctx.lineTo(x, y);
                                     }
                                     ctx.closePath();
-                                    ctx.strokeStyle = state.current.theme === 'dark' ? '#fff' : '#000';
+                                    ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#fff' : '#000';
                                     ctx.lineWidth = 8;
                                     ctx.stroke();
                                 }

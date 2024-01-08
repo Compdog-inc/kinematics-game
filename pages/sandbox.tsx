@@ -9,6 +9,7 @@ import KeyboardDoubleArrowRightRounded from '@mui/icons-material/KeyboardDoubleA
 import KeyboardDoubleArrowUpRounded from '@mui/icons-material/KeyboardDoubleArrowUpRounded';
 import KeyboardDoubleArrowDownRounded from '@mui/icons-material/KeyboardDoubleArrowDownRounded';
 import IosShareRounded from '@mui/icons-material/IosShareRounded';
+import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
 import styles from "../styles/sandbox.module.css";
 import classNames from "classnames";
 import List from "@mui/joy/List";
@@ -32,6 +33,7 @@ export default function Sandbox() {
     const [shareUrl, setShareUrl] = React.useState("");
     const [copyBtnCopied, setCopyBtnCopied] = React.useState(false);
     const [showShareDialog, setShowShareDialog] = React.useState(false);
+    const [forceLightMode, setForceLightMode] = React.useState(false);
 
     const shareUrlInput = React.useRef(null as HTMLInputElement | null);
 
@@ -170,7 +172,9 @@ export default function Sandbox() {
                     width: '100vw',
                     height: 'calc(100vh - 60px)'
                 }}>
-                    <GameWidget drag stref={(o) => widget.current = o} ref={widgetCv} />
+                    <div style={{ height: '100%', backgroundColor: forceLightMode ? '#fff' : undefined }}>
+                        <GameWidget drag stref={(o) => widget.current = o} ref={widgetCv} />
+                    </div>
                     <IconButton variant="plain" size="md" tabIndex={0} aria-label="Open drawer" onClick={() => setOpen(!open)} sx={{
                         position: 'fixed',
                         left: '5px',
@@ -194,10 +198,30 @@ export default function Sandbox() {
                     </IconButton>
                     <Tooltip title={
                         <>
+                            Toggle forced light mode
+                        </>
+                    } arrow placement="bottom" variant="outlined">
+                        <IconButton variant={forceLightMode ? "solid" : "plain"} size="md" tabIndex={1} aria-label={forceLightMode ? "Disable forced light mode" : "Enable forced light mode"} sx={{
+                            position: 'fixed',
+                            right: '45px',
+                            top: '65px',
+                        }} onClick={() => {
+                            setForceLightMode(!forceLightMode);
+                            if (widget.current) {
+                                widget.current.forceLight = !forceLightMode;
+                                if (widget.current.render)
+                                    requestAnimationFrame(widget.current.render);
+                            }
+                        }}>
+                            <LightModeRoundedIcon />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title={
+                        <>
                             Share this simulation
                         </>
-                    } arrow placement="left" variant="outlined">
-                        <IconButton variant="plain" size="md" tabIndex={1} aria-label="Share this simulation" sx={{
+                    } arrow placement="bottom" variant="outlined">
+                        <IconButton variant="plain" size="md" tabIndex={2} aria-label="Share this simulation" sx={{
                             position: 'fixed',
                             right: '5px',
                             top: '65px',
