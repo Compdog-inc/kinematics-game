@@ -1340,13 +1340,17 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
 
         if (anySelected && !hadSelection.current) {
             hadSelection.current = true;
-            if (typeof (onNodeSelect) === 'function') {
-                onNodeSelect();
-            }
         } else if (!anySelected && hadSelection.current) {
             hadSelection.current = false;
             if (typeof (onNodeSelectionClear) === 'function') {
                 onNodeSelectionClear();
+            }
+        }
+
+        // Workaround for custom node selection updates
+        if (anySelected) {
+            if (typeof (onNodeSelect) === 'function') {
+                onNodeSelect();
             }
         }
 
