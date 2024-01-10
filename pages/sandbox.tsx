@@ -32,7 +32,7 @@ import Grid from "@mui/joy/Grid";
 
 export default function Sandbox() {
     const [open, setOpen] = React.useState(true);
-    const [currentAdd, setCurrentAdd] = React.useState(-1);
+    const [currentAdd, setCurrentAdd] = React.useState(-1 as number | string);
     const [shareUrl, setShareUrl] = React.useState("");
     const [copyBtnCopied, setCopyBtnCopied] = React.useState(false);
     const [showShareDialog, setShowShareDialog] = React.useState(false);
@@ -196,19 +196,19 @@ export default function Sandbox() {
                 }}>
                     <Grid>
                         <SandboxCard id="link"
-                            addToggled={currentAdd === 7} onAddClick={() => setCurrentAdd(currentAdd === 7 ? -1 : 7)} drop={setDropTransfer} dragOver={gameDragOver} dragLeave={gameDragLeave} dragFilter={gameDragFilter}
+                            addToggled={currentAdd === "link"} onAddClick={() => setCurrentAdd(currentAdd === "link" ? -1 : "link")} drop={setDropTransfer} dragOver={gameDragOver} dragLeave={gameDragLeave} dragFilter={gameDragFilter}
                             thumbnail={cardPlaceholderImg}
                             name="Link" mode="square" />
                     </Grid>
                     <Grid>
                         <SandboxCard id="label"
-                            addToggled={currentAdd === 8} onAddClick={() => setCurrentAdd(currentAdd === 8 ? -1 : 8)} drop={setDropTransfer} dragOver={gameDragOver} dragLeave={gameDragLeave} dragFilter={gameDragFilter}
+                            addToggled={currentAdd === "label"} onAddClick={() => setCurrentAdd(currentAdd === "label" ? -1 : "label")} drop={setDropTransfer} dragOver={gameDragOver} dragLeave={gameDragLeave} dragFilter={gameDragFilter}
                             thumbnail={cardPlaceholderImg}
                             name="Label" mode="square" />
                     </Grid>
                     <Grid>
                         <SandboxCard id="comment"
-                            addToggled={currentAdd === 9} onAddClick={() => setCurrentAdd(currentAdd === 9 ? -1 : 9)} drop={setDropTransfer} dragOver={gameDragOver} dragLeave={gameDragLeave} dragFilter={gameDragFilter}
+                            addToggled={currentAdd === "comment"} onAddClick={() => setCurrentAdd(currentAdd === "comment" ? -1 : "comment")} drop={setDropTransfer} dragOver={gameDragOver} dragLeave={gameDragLeave} dragFilter={gameDragFilter}
                             thumbnail={cardPlaceholderImg}
                             name="Comment" mode="square" />
                     </Grid>

@@ -159,7 +159,7 @@ export interface HTMLGameWidget {
         right: number,
         bottom: number
     };
-    addOnClickId: number;
+    addOnClickId: number | string;
     dropId: number;
     dropLink: boolean;
     render?: () => void;
@@ -637,6 +637,25 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                         ctx.stroke();
                         ctx.lineCap = "butt";
                     }
+                }
+            };
+
+            const drawLinkTemplate = (x: number, y: number) => {
+                if (state.current.worldToPx) {
+                    ctx.globalAlpha = .5;
+                    ctx.beginPath();
+                    const p1 = state.current.worldToPx(x - 1, y);
+                    const p2 = state.current.worldToPx(x + 1, y);
+                    if (p1 && p2) {
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.lineCap = "round";
+                        ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#858699' : '#595966';
+                        ctx.lineWidth = 8;
+                        ctx.stroke();
+                        ctx.lineCap = "butt";
+                    }
+                    ctx.globalAlpha = 1;
                 }
             };
 
@@ -1290,8 +1309,10 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                 if (worldMouse) {
                     if (state.current.dropId !== -1) {
                         drawNodeTemplate(state.current.dropId, worldMouse.x, worldMouse.y);
-                    } else if (state.current.addOnClickId !== -1) {
+                    } else if (typeof (state.current.addOnClickId) === 'number' && state.current.addOnClickId !== -1) {
                         drawNodeTemplate(state.current.addOnClickId, worldMouse.x, worldMouse.y);
+                    } else if (state.current.addOnClickId === 'link' || state.current.dropLink) {
+                        drawLinkTemplate(worldMouse.x, worldMouse.y);
                     }
                 }
             }
@@ -1533,11 +1554,22 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                 if (!anyOver) {
                     const world = state.current.pxToWorld ? state.current.pxToWorld(state.current.mx, state.current.my) : null;
                     if (world) {
-                        state.current.nodes.push(mapDefaultNode(new GameWidgetNode(
-                            state.current.addOnClickId,
-                            world.x,
-                            world.y
-                        )));
+                        if (typeof (state.current.addOnClickId) === 'number') {
+                            state.current.nodes.push(mapDefaultNode(new GameWidgetNode(
+                                state.current.addOnClickId,
+                                world.x,
+                                world.y
+                            )));
+                        } else if (state.current.addOnClickId === 'link') {
+                            state.current.freeLinks.push({
+                                x1: world.x - 1,
+                                y1: world.y,
+                                x2: world.x + 1,
+                                y2: world.y,
+                                child: null,
+                                parent: null
+                            });
+                        }
                         requestAnimationFrame(render);
                     }
                 }
