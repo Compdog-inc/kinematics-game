@@ -102,6 +102,7 @@ export default function Sandbox() {
                         null,
                         null
                     );
+                    link.selected = true;
                     widget.current.simLinks.push(link);
                 } else {
                     const ref = new GameWidgetNode(

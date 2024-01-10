@@ -16,6 +16,15 @@ export const closestDeltaOnSegment = (x: number, y: number, x1: number, y1: numb
     ));
 };
 
+export const distanceToSegmentSquared = (x: number, y: number, x1: number, y1: number, x2: number, y2: number) => {
+    const delta = closestDeltaOnSegment(x, y, x1, y1, x2, y2);
+    const px = x1 * (1 - delta) + x2 * delta;
+    const py = y1 * (1 - delta) + y2 * delta;
+    const dx = x - px;
+    const dy = y - py;
+    return dx * dx + dy * dy;
+};
+
 const PI2 = Math.PI * 2;
 
 export const normalizeAngle = (angle: number): number => {

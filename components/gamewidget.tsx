@@ -3,7 +3,7 @@ import Box from "@mui/joy/Box";
 import styles from '../styles/gamewidget.module.css';
 import React, { useEffect } from "react";
 import { useColorScheme } from "@mui/joy/styles";
-import { closestDeltaOnSegment, maximizeAngle, normalizeAngle } from "../utils/algebra";
+import { closestDeltaOnSegment, maximizeAngle, normalizeAngle, distanceToSegmentSquared } from "../utils/algebra";
 
 export class GameWidgetNode {
     id: number;
@@ -44,6 +44,7 @@ export class GameWidgetLink {
     // editor values
     hover: boolean;
     dragging: boolean;
+    selected: boolean;
     xdrag?: number;
     ydrag?: number;
     dragTarget?: "child" | "parent";
@@ -57,6 +58,7 @@ export class GameWidgetLink {
         this.child = child;
         this.hover = false;
         this.dragging = false;
+        this.selected = false;
     }
 }
 
@@ -642,16 +644,30 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
 
             const drawLink = (link: GameWidgetLink) => {
                 if (state.current.worldToPx) {
-                    ctx.beginPath();
                     const p1 = state.current.worldToPx(link.x1, link.y1);
                     const p2 = state.current.worldToPx(link.x2, link.y2);
                     if (p1 && p2) {
-                        ctx.moveTo(p1.x, p1.y);
-                        ctx.lineTo(p2.x, p2.y);
+                        const cx = (p1.x + p2.x) / 2;
+                        const cy = (p1.y + p2.y) / 2;
+                        ctx.beginPath();
+                        ctx.moveTo(link.dragTarget === 'child' ? p1.x : cx, link.dragTarget === 'child' ? p1.y : cy);
+                        ctx.lineTo(link.dragTarget === 'child' ? cx : p2.x, link.dragTarget === 'child' ? cy : p2.y);
                         ctx.lineCap = "round";
-                        ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#858699' : '#595966';
+                        const baseCol = (state.current.theme === 'dark' && !state.current.forceLight) ?
+                            (link.selected ? '#6a6fa8' : '#858699') :
+                            (link.selected ? '#38388a' : '#595966');
+                        ctx.strokeStyle = baseCol;
                         ctx.lineWidth = 8;
                         ctx.stroke();
+                        ctx.beginPath();
+                        ctx.moveTo(link.dragTarget === 'child' ? cx : p1.x, link.dragTarget === 'child' ? cy : p1.y);
+                        ctx.lineTo(link.dragTarget === 'child' ? p2.x : cx, link.dragTarget === 'child' ? p2.y : cy);
+                        ctx.lineCap = "round";
+                        ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ?
+                            (link.hover ? '#fff' : baseCol) :
+                            (link.hover ? '#000' : baseCol);
+                        ctx.lineWidth = link.hover ? 11 : 8;
+                        ctx.stroke()
                         ctx.lineCap = "butt";
                     }
                 }
@@ -1534,6 +1550,37 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
             }
         }
 
+        for (const link of state.current.simLinks) {
+            link.hover = false;
+            if (state.current.worldToPx) {
+                const p1 = state.current.worldToPx(link.x1, link.y1);
+                const p2 = state.current.worldToPx(link.x2, link.y2);
+                if (p1 && p2) {
+                    const dist2 = distanceToSegmentSquared(state.current.mx, state.current.my, p1.x, p1.y, p2.x, p2.y);
+                    if (dist2 <= 144) {
+                        link.hover = true;
+                    }
+
+                    link.selected = false;
+                    if (link.hover) {
+                        link.selected = true;
+                        anySelected = true;
+                        link.dragging = true;
+                        const closest = closestDeltaOnSegment(state.current.mx, state.current.my, p1.x, p1.y, p2.x, p2.y);
+                        if (closest < 0.5) {
+                            link.xdrag = link.x1;
+                            link.ydrag = link.y1;
+                            link.dragTarget = "parent";
+                        } else {
+                            link.xdrag = link.x2;
+                            link.ydrag = link.y2;
+                            link.dragTarget = "child";
+                        }
+                    }
+                }
+            }
+        }
+
         if (anySelected && !hadSelection.current) {
             hadSelection.current = true;
         } else if (!anySelected && hadSelection.current) {
@@ -1566,6 +1613,14 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                     if (node.hover && node.selected) {
                         anyOver = true;
                         break;
+                    }
+                }
+                if (!anyOver) {
+                    for (const link of state.current.simLinks) {
+                        if (link.hover && link.selected) {
+                            anyOver = true;
+                            break;
+                        }
                     }
                 }
                 if (!anyOver) {
@@ -1603,6 +1658,12 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                         handle.dragging = false;
                     }
                 }
+            }
+        }
+
+        for (const link of state.current.simLinks) {
+            if (link.dragging) {
+                link.dragging = false;
             }
         }
     }, [state, render]);
@@ -1709,6 +1770,27 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                     }
                 }
                 if (old != node.hover)
+                    changed = true;
+            }
+            for (const link of state.current.simLinks) {
+                const old = link.hover;
+                const oldTarget = link.dragTarget;
+                link.hover = false;
+                const p1 = state.current.worldToPx(link.x1, link.y1);
+                const p2 = state.current.worldToPx(link.x2, link.y2);
+                if (p1 && p2) {
+                    const dist2 = distanceToSegmentSquared(state.current.mx, state.current.my, p1.x, p1.y, p2.x, p2.y);
+                    if (dist2 <= 144) {
+                        link.hover = true;
+                        const closest = closestDeltaOnSegment(state.current.mx, state.current.my, p1.x, p1.y, p2.x, p2.y);
+                        if (closest < 0.5) {
+                            link.dragTarget = "parent";
+                        } else {
+                            link.dragTarget = "child";
+                        }
+                    }
+                }
+                if (old != link.hover || oldTarget != link.dragTarget)
                     changed = true;
             }
             if (changed)
