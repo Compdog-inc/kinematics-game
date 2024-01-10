@@ -1239,7 +1239,7 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                     onNodeSelect();
             }
         };
-    }, [render]);
+    }, [render, onNodeSelectionClear, onNodeSelect]);
 
     useEffect(() => {
         state.current.theme = mode === 'system' ? systemMode : mode;
@@ -1365,7 +1365,7 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
         }
 
         requestAnimationFrame(render);
-    }, [state, render]);
+    }, [state, render, onNodeSelectionClear, onNodeSelect]);
 
     const pointerUp = React.useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
         e.preventDefault();
