@@ -129,7 +129,7 @@ export const toSimulation = (buffer: Buffer, data: HTMLGameWidget) => {
         const y = buffer.readDoubleLE(offset); offset += 8;
         /// =========== END NODE HEADER =============
 
-        const node: GameWidgetNode = { id: id, x: x, y: y };
+        const node: GameWidgetNode = new GameWidgetNode(id, x, y);
         switch (id) {
             case 0: // fixed node
                 /// ========== BEGIN NODE BODY ============
