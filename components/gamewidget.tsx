@@ -3,6 +3,7 @@ import Box from "@mui/joy/Box";
 import styles from '../styles/gamewidget.module.css';
 import React, { useEffect } from "react";
 import { useColorScheme } from "@mui/joy/styles";
+import { closestDeltaOnSegment, maximizeAngle, normalizeAngle } from "../utils/algebra";
 
 export interface GameWidgetNode {
     id: number;
@@ -310,6 +311,7 @@ const updateHandle = (state: HTMLGameWidget, node: GameWidgetNode, handle: GameW
                                 (node as GameWidgetClampedTranslatingNode).x2 = pos.x;
                                 (node as GameWidgetClampedTranslatingNode).y2 = pos.y;
                             }
+                            updateNodePosition(state, node);
                         }
                     }
                     break;
@@ -343,6 +345,7 @@ const updateHandle = (state: HTMLGameWidget, node: GameWidgetNode, handle: GameW
                                 }
                             }
                         }
+                        updateNodePosition(state, node);
                     }
                     break;
                 case 6: // polygonal translating node
@@ -381,6 +384,52 @@ const updateHandle = (state: HTMLGameWidget, node: GameWidgetNode, handle: GameW
                     }
                     break;
             }
+        }
+    }
+};
+
+const calculateClosestNode = (state: HTMLGameWidget, node: GameWidgetNode) => {
+    if (state) {
+        switch (node.id) {
+            case 4: // clamped translating node
+                {
+                    const tmp = (node as GameWidgetClampedTranslatingNode);
+                    (node as GameWidgetClampedTranslatingNode).delta = closestDeltaOnSegment(tmp.x, tmp.y, tmp.x1, tmp.y1, tmp.x2, tmp.y2);
+                }
+                break;
+            case 5: // arc translating node
+                {
+                    const tmp = (node as GameWidgetArcTranslatingNode);
+                    const min = normalizeAngle(tmp.minAngle * Math.PI / 180 + Math.PI / 2);
+                    const max = maximizeAngle(tmp.maxAngle * Math.PI / 180 + Math.PI / 2, min);
+                    const angle = maximizeAngle(Math.atan2(tmp.y - tmp.cy, tmp.x - tmp.cx), min);
+                    (node as GameWidgetArcTranslatingNode).delta = Math.max(0, Math.min(1, (angle - min) / (max - min)));
+                }
+                break;
+        }
+    }
+};
+
+const updateNodePosition = (state: HTMLGameWidget, node: GameWidgetNode) => {
+    if (state) {
+        switch (node.id) {
+            case 4: // clamped translating node
+                {
+                    const tmp = (node as GameWidgetClampedTranslatingNode);
+                    node.x = tmp.x1 * (1 - tmp.delta) + tmp.x2 * tmp.delta;
+                    node.y = tmp.y1 * (1 - tmp.delta) + tmp.y2 * tmp.delta;
+                }
+                break;
+            case 5: // arc translating node
+                {
+                    const tmp = (node as GameWidgetArcTranslatingNode);
+                    const min = normalizeAngle(tmp.minAngle * Math.PI / 180 + Math.PI / 2);
+                    const max = maximizeAngle(tmp.maxAngle * Math.PI / 180 + Math.PI / 2, min);
+                    const angle = tmp.delta * (max - min) + min;
+                    node.x = tmp.cx + tmp.r * Math.cos(angle);
+                    node.y = tmp.cy + tmp.r * Math.sin(angle);
+                }
+                break;
         }
     }
 };
@@ -695,9 +744,9 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                                     ctx.beginPath();
                                     const rad = 20;
                                     for (let i = 0; i < 3; i++) {
-                                        const a = 2 * Math.PI / 3 * i + angle - Math.PI / 2;
-                                        const x = px.x + rad * Math.cos(a);
-                                        const y = px.y + rad * Math.sin(a);
+                                        const a = 2 * Math.PI / 3 * i + angle + Math.PI / 2;
+                                        const x = px.x + rad * Math.cos(-a);
+                                        const y = px.y + rad * Math.sin(-a);
                                         if (i === 0)
                                             ctx.moveTo(x, y);
                                         else
@@ -725,8 +774,8 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                         case 5: // arc translating node
                             {
                                 const tmp = node as GameWidgetArcTranslatingNode;
-                                const min = tmp.minAngle * Math.PI / 180 + Math.PI / 2;
-                                const max = tmp.maxAngle * Math.PI / 180 + Math.PI / 2;
+                                const min = normalizeAngle(tmp.minAngle * Math.PI / 180 + Math.PI / 2);
+                                const max = maximizeAngle(tmp.maxAngle * Math.PI / 180 + Math.PI / 2, min);
                                 const px = state.current.worldToPx(node.x, node.y);
                                 const cp = state.current.worldToPx(tmp.cx, tmp.cy);
                                 const rd = state.current.worldToPx(tmp.cx + tmp.r, tmp.cy - tmp.r);
@@ -734,7 +783,7 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                                     const rx = rd.x - cp.x;
                                     const ry = rd.y - cp.y;
 
-                                    const angle = tmp.delta * (max - min) + min - Math.PI / 2;
+                                    const angle = tmp.delta * (max - min) + min;
 
                                     ctx.beginPath();
                                     ctx.ellipse(cp.x, cp.y, rx, ry, 0, -max, -min, false);
@@ -747,7 +796,7 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                                     ctx.beginPath();
                                     const rad = 20;
                                     for (let i = 0; i < 3; i++) {
-                                        const a = 2 * Math.PI / 3 * i + angle - Math.PI / 2;
+                                        const a = 2 * Math.PI / 3 * i - angle;
                                         const x = px.x + rad * Math.cos(a);
                                         const y = px.y + rad * Math.sin(a);
                                         if (i === 0)
@@ -1453,6 +1502,9 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                         fallthrough = false;
                         node.x = node.xdrag + wdx * Math.max(1, aspectScreen);
                         node.y = node.ydrag + wdy / Math.min(1, aspectScreen);
+
+                        calculateClosestNode(state.current, node);
+                        updateNodePosition(state.current, node);
 
                         if (node.id === 6) // polygonal translating
                         {
