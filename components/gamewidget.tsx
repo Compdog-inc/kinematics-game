@@ -1578,7 +1578,9 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                         const closest = closestDeltaOnSegment(state.current.mx, state.current.my, p1.x, p1.y, p2.x, p2.y);
                         link.xdrag = link.x1 * (1 - closest) + link.x2 * closest;
                         link.ydrag = link.y1 * (1 - closest) + link.y2 * closest;
-                        const length = Math.sqrt((link.x2 - link.x1) ** 2 + (link.y2 - link.y1) ** 2);
+                        const ndx = link.x2 - link.x1;
+                        const ndy = link.y2 - link.y1;
+                        const length = Math.sqrt(ndx * ndx + ndy * ndy);
                         if (closest < 0.5) {
                             link.dragTarget = "parent";
                             link.edgeOffset = closest * length;
@@ -1760,6 +1762,25 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                                 const delta = -link.edgeOffset / length;
                                 link.x1 = nx * (1 - delta) + link.x2 * delta;
                                 link.y1 = ny * (1 - delta) + link.y2 * delta;
+
+                                // check nodes to snap to
+                                if (state.current.worldToPx) {
+                                    const lp = state.current.worldToPx(link.x1, link.y1);
+                                    if (lp) {
+                                        for (const node of state.current.nodes) {
+                                            const np = state.current.worldToPx(node.x, node.y);
+                                            if (np) {
+                                                const ndx = lp.x - np.x;
+                                                const ndy = lp.y - np.y;
+                                                if (ndx * ndx + ndy * ndy <= 400) {
+                                                    link.x1 = node.x;
+                                                    link.y1 = node.y;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             } else if (link.dragTarget === 'child') {
                                 const ldx = nx - link.x1;
                                 const ldy = ny - link.y1;
@@ -1767,6 +1788,25 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                                 const delta = link.edgeOffset / length + 1;
                                 link.x2 = link.x1 * (1 - delta) + nx * delta;
                                 link.y2 = link.y1 * (1 - delta) + ny * delta;
+
+                                // check nodes to snap to
+                                if (state.current.worldToPx) {
+                                    const lp = state.current.worldToPx(link.x2, link.y2);
+                                    if (lp) {
+                                        for (const node of state.current.nodes) {
+                                            const np = state.current.worldToPx(node.x, node.y);
+                                            if (np) {
+                                                const ndx = lp.x - np.x;
+                                                const ndy = lp.y - np.y;
+                                                if (ndx * ndx + ndy * ndy <= 400) {
+                                                    link.x2 = node.x;
+                                                    link.y2 = node.y;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
