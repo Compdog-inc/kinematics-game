@@ -5,16 +5,38 @@ import React, { useEffect } from "react";
 import { useColorScheme } from "@mui/joy/styles";
 import { closestDeltaOnSegment, maximizeAngle, normalizeAngle } from "../utils/algebra";
 
-export interface GameWidgetNode {
+export class GameWidgetNode {
     id: number;
     x: number;
     y: number;
-    hover?: boolean;
-    selected?: boolean;
-    dragging?: boolean;
+    hover: boolean;
+    selected: boolean;
+    dragging: boolean;
     xdrag?: number;
     ydrag?: number;
     handles?: GameWidgetHandle[];
+
+    constructor(id: number, x: number, y: number) {
+        this.id = id;
+        this.x = x;
+        this.y = y;
+        this.hover = false;
+        this.selected = false;
+        this.dragging = false;
+        this.xdrag = undefined;
+        this.ydrag = undefined;
+        this.handles = undefined;
+    }
+}
+
+export interface GameWidgetLink {
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+    // arbitrary parent/child relationship for kinematics/inverse kinematics
+    parent: GameWidgetNode;
+    child: GameWidgetNode;
 }
 
 export interface GameWidgetHandle {
@@ -27,45 +49,92 @@ export interface GameWidgetHandle {
     ydrag?: number;
 }
 
-export interface GameWidgetFixedNode extends GameWidgetNode {
+export class GameWidgetFixedNode extends GameWidgetNode {
+    constructor(x: number, y: number) {
+        super(0, x, y);
+    }
 }
 
-export interface GameWidgetRotatingNode extends GameWidgetNode {
+export class GameWidgetRotatingNode extends GameWidgetNode {
     angle: number;
+
+    constructor(x: number, y: number, angle: number) {
+        super(1, x, y);
+        this.angle = angle;
+    }
 }
 
-export interface GameWidgetTranslatingNode extends GameWidgetNode {
+export class GameWidgetTranslatingNode extends GameWidgetNode {
     angle: number;
     delta: number;
+
+    constructor(x: number, y: number, angle: number, delta: number) {
+        super(2, x, y);
+        this.angle = angle;
+        this.delta = delta;
+    }
 }
 
-export interface GameWidgetClampedNode extends GameWidgetNode {
+export class GameWidgetClampedNode extends GameWidgetNode {
     angle: number;
     minAngle: number;
     maxAngle: number;
+
+    constructor(x: number, y: number, angle: number, minAngle: number, maxAngle: number) {
+        super(3, x, y);
+        this.angle = angle;
+        this.minAngle = minAngle;
+        this.maxAngle = maxAngle;
+    }
 }
 
-export interface GameWidgetClampedTranslatingNode extends GameWidgetNode {
+export class GameWidgetClampedTranslatingNode extends GameWidgetNode {
     x1: number;
     y1: number;
     x2: number;
     y2: number;
     delta: number;
+
+    constructor(x: number, y: number, x1: number, y1: number, x2: number, y2: number, delta: number) {
+        super(4, x, y);
+        this.x1 = x1;
+        this.y1 = y1;
+        this.x2 = x2;
+        this.y2 = y2;
+        this.delta = delta;
+    }
 }
 
-export interface GameWidgetArcTranslatingNode extends GameWidgetNode {
+export class GameWidgetArcTranslatingNode extends GameWidgetNode {
     cx: number;
     cy: number;
     r: number;
     minAngle: number;
     maxAngle: number;
     delta: number;
+
+    constructor(x: number, y: number, cx: number, cy: number, r: number, minAngle: number, maxAngle: number, delta: number) {
+        super(5, x, y);
+        this.cx = cx;
+        this.cy = cy;
+        this.r = r;
+        this.minAngle = minAngle;
+        this.maxAngle = maxAngle;
+        this.delta = delta;
+    }
 }
 
-export interface GameWidgetPolygonalTranslatingNode extends GameWidgetNode {
+export class GameWidgetPolygonalTranslatingNode extends GameWidgetNode {
     px: number[];
     py: number[];
     delta: number;
+
+    constructor(x: number, y: number, px: number[], py: number[], delta: number) {
+        super(6, x, y);
+        this.px = px;
+        this.py = py;
+        this.delta = delta;
+    }
 }
 
 export interface HTMLGameWidget {
@@ -1434,11 +1503,11 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                 if (!anyOver) {
                     const world = state.current.pxToWorld ? state.current.pxToWorld(state.current.mx, state.current.my) : null;
                     if (world) {
-                        state.current.nodes.push(mapDefaultNode({
-                            id: state.current.addOnClickId,
-                            x: world.x,
-                            y: world.y
-                        }));
+                        state.current.nodes.push(mapDefaultNode(new GameWidgetNode(
+                            state.current.addOnClickId,
+                            world.x,
+                            world.y
+                        )));
                         requestAnimationFrame(render);
                     }
                 }

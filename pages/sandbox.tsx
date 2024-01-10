@@ -1,5 +1,5 @@
 import Head from "next/head";
-import GameWidget, { HTMLGameWidget, mapDefaultNode, getHandles } from "../components/gamewidget";
+import GameWidget, { HTMLGameWidget, mapDefaultNode, getHandles, GameWidgetNode } from "../components/gamewidget";
 import Box from "@mui/joy/Box";
 import Drawer from "@mui/joy/Drawer";
 import IconButton from "@mui/joy/IconButton";
@@ -93,12 +93,13 @@ export default function Sandbox() {
                 for (const n of widget.current.nodes) {
                     n.selected = false;
                 }
-                const node = mapDefaultNode({
-                    id: widget.current.dropId,
-                    x: world.x,
-                    y: world.y,
-                    selected: true
-                });
+                const ref = new GameWidgetNode(
+                    widget.current.dropId,
+                    world.x,
+                    world.y
+                );
+                ref.selected = true;
+                const node = mapDefaultNode(ref);
                 node.handles = getHandles(widget.current, node);
                 widget.current.nodes.push(node);
                 if (widget.current.updateSelection)
