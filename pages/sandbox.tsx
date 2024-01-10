@@ -1,5 +1,5 @@
 import Head from "next/head";
-import GameWidget, { HTMLGameWidget, mapDefaultNode, getHandles, GameWidgetNode } from "../components/gamewidget";
+import GameWidget, { HTMLGameWidget, mapDefaultNode, getHandles, GameWidgetNode, GameWidgetLink } from "../components/gamewidget";
 import Box from "@mui/joy/Box";
 import Drawer from "@mui/joy/Drawer";
 import IconButton from "@mui/joy/IconButton";
@@ -93,19 +93,32 @@ export default function Sandbox() {
                 for (const n of widget.current.nodes) {
                     n.selected = false;
                 }
-                const ref = new GameWidgetNode(
-                    widget.current.dropId,
-                    world.x,
-                    world.y
-                );
-                ref.selected = true;
-                const node = mapDefaultNode(ref);
-                node.handles = getHandles(widget.current, node);
-                widget.current.nodes.push(node);
+                if (widget.current.dropLink) {
+                    const link: GameWidgetLink = {
+                        parent: null,
+                        child: null,
+                        x1: world.x - 1,
+                        y1: world.y,
+                        x2: world.x + 1,
+                        y2: world.y
+                    };
+                    widget.current.freeLinks.push(link);
+                } else {
+                    const ref = new GameWidgetNode(
+                        widget.current.dropId,
+                        world.x,
+                        world.y
+                    );
+                    ref.selected = true;
+                    const node = mapDefaultNode(ref);
+                    node.handles = getHandles(widget.current, node);
+                    widget.current.nodes.push(node);
+                }
                 if (widget.current.updateSelection)
                     widget.current.updateSelection();
             }
             widget.current.dropId = -1;
+            widget.current.dropLink = false;
             if (widget.current.render)
                 requestAnimationFrame(widget.current.render);
         }
@@ -113,6 +126,15 @@ export default function Sandbox() {
 
     const gameDragOver = React.useCallback((e: globalThis.PointerEvent, id: string) => {
         if (widget.current && widgetCv.current) {
+            if (id === "link") {
+                widget.current.dropLink = true;
+                const bounds = widgetCv.current.getBoundingClientRect();
+                widget.current.mx = (e.clientX - bounds.left) * 2;
+                widget.current.my = (e.clientY - bounds.top) * 2;
+                widget.current.useMp = true;
+            } else {
+                widget.current.dropLink = false;
+            }
             if (!isNaN(parseInt(id)) && !isNaN(Number(id))) {
                 widget.current.dropId = Number(id);
                 const bounds = widgetCv.current.getBoundingClientRect();
@@ -131,6 +153,7 @@ export default function Sandbox() {
     const gameDragLeave = React.useCallback(() => {
         if (widget.current) {
             widget.current.dropId = -1;
+            widget.current.dropLink = false;
             widget.current.useMp = false;
             if (widget.current.render)
                 requestAnimationFrame(widget.current.render);

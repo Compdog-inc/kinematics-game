@@ -39,8 +39,8 @@ export interface GameWidgetLink {
     x2: number;
     y2: number;
     // arbitrary parent/child relationship for kinematics/inverse kinematics
-    parent: GameWidgetNode;
-    child: GameWidgetNode;
+    parent: GameWidgetNode | null;
+    child: GameWidgetNode | null;
 }
 
 export interface GameWidgetHandle {
@@ -161,11 +161,13 @@ export interface HTMLGameWidget {
     };
     addOnClickId: number;
     dropId: number;
+    dropLink: boolean;
     render?: () => void;
     updateSelection?: () => void;
     pxToWorld?: (x: number, y: number) => { x: number, y: number } | null;
     worldToPx?: (x: number, y: number) => { x: number, y: number } | null;
     nodes: GameWidgetNode[];
+    freeLinks: GameWidgetLink[];
     forceLight?: boolean;
     deleteMode: boolean;
     testNode: (id: number, selected: boolean) => boolean;
@@ -536,7 +538,9 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
         },
         addOnClickId: -1,
         dropId: -1,
+        dropLink: false,
         nodes: [],
+        freeLinks: [],
         deleteMode: false,
         testNode: (id, selected) => {
             for (const node of state.current.nodes) {
