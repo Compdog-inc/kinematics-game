@@ -623,8 +623,30 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                 ctx.stroke();
             }
 
-            // draw model nodes
+            const drawLink = (link: GameWidgetLink) => {
+                if (state.current.worldToPx) {
+                    ctx.beginPath();
+                    const p1 = state.current.worldToPx(link.x1, link.y1);
+                    const p2 = state.current.worldToPx(link.x2, link.y2);
+                    if (p1 && p2) {
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.lineCap = "round";
+                        ctx.strokeStyle = (state.current.theme === 'dark' && !state.current.forceLight) ? '#858699' : '#595966';
+                        ctx.lineWidth = 8;
+                        ctx.stroke();
+                        ctx.lineCap = "butt";
+                    }
+                }
+            };
+
             if (state.current.worldToPx) {
+                // draw free links
+                for (const link of state.current.freeLinks) {
+                    drawLink(link);
+                }
+
+                // draw model nodes
                 for (const node of state.current.nodes) {
                     const mainColor = (state.current.theme === 'dark' && !state.current.forceLight) ? (node.hover ? '#cacfed' : '#fff') : (node.hover ? '#404252' : '#000');
                     switch (node.id) {
