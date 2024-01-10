@@ -33,7 +33,7 @@ export class GameWidgetNode {
     }
 }
 
-export interface GameWidgetLink {
+export class GameWidgetLink {
     x1: number;
     y1: number;
     x2: number;
@@ -41,6 +41,23 @@ export interface GameWidgetLink {
     // arbitrary parent/child relationship for kinematics/inverse kinematics
     parent: GameWidgetNode | null;
     child: GameWidgetNode | null;
+    // editor values
+    hover: boolean;
+    dragging: boolean;
+    xdrag?: number;
+    ydrag?: number;
+    dragTarget?: "child" | "parent";
+
+    constructor(x1: number, y1: number, x2: number, y2: number, parent: GameWidgetNode | null, child: GameWidgetNode | null) {
+        this.x1 = x1;
+        this.y1 = y1;
+        this.x2 = x2;
+        this.y2 = y2;
+        this.parent = parent;
+        this.child = child;
+        this.hover = false;
+        this.dragging = false;
+    }
 }
 
 export interface GameWidgetHandle {
@@ -167,7 +184,7 @@ export interface HTMLGameWidget {
     pxToWorld?: (x: number, y: number) => { x: number, y: number } | null;
     worldToPx?: (x: number, y: number) => { x: number, y: number } | null;
     nodes: GameWidgetNode[];
-    freeLinks: GameWidgetLink[];
+    simLinks: GameWidgetLink[];
     forceLight?: boolean;
     deleteMode: boolean;
     testNode: (id: number, selected: boolean) => boolean;
@@ -540,7 +557,7 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
         dropId: -1,
         dropLink: false,
         nodes: [],
-        freeLinks: [],
+        simLinks: [],
         deleteMode: false,
         testNode: (id, selected) => {
             for (const node of state.current.nodes) {
@@ -660,8 +677,8 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
             };
 
             if (state.current.worldToPx) {
-                // draw free links
-                for (const link of state.current.freeLinks) {
+                // draw simulation links
+                for (const link of state.current.simLinks) {
                     drawLink(link);
                 }
 
@@ -1561,14 +1578,14 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                                 world.y
                             )));
                         } else if (state.current.addOnClickId === 'link') {
-                            state.current.freeLinks.push({
-                                x1: world.x - 1,
-                                y1: world.y,
-                                x2: world.x + 1,
-                                y2: world.y,
-                                child: null,
-                                parent: null
-                            });
+                            state.current.simLinks.push(new GameWidgetLink(
+                                world.x - 1,
+                                world.y,
+                                world.x + 1,
+                                world.y,
+                                null,
+                                null
+                            ));
                         }
                         requestAnimationFrame(render);
                     }

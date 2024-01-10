@@ -94,15 +94,15 @@ export default function Sandbox() {
                     n.selected = false;
                 }
                 if (widget.current.dropLink) {
-                    const link: GameWidgetLink = {
-                        parent: null,
-                        child: null,
-                        x1: world.x - 1,
-                        y1: world.y,
-                        x2: world.x + 1,
-                        y2: world.y
-                    };
-                    widget.current.freeLinks.push(link);
+                    const link = new GameWidgetLink(
+                        world.x - 1,
+                        world.y,
+                        world.x + 1,
+                        world.y,
+                        null,
+                        null
+                    );
+                    widget.current.simLinks.push(link);
                 } else {
                     const ref = new GameWidgetNode(
                         widget.current.dropId,
