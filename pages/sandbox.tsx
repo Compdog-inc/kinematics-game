@@ -28,6 +28,7 @@ import Typography from "@mui/joy/Typography";
 import Input from "@mui/joy/Input";
 import Button from "@mui/joy/Button";
 import { fromSimulationUrl, toSimulationUrl } from "../utils/serializer";
+import Grid from "@mui/joy/Grid";
 
 export default function Sandbox() {
     const [open, setOpen] = React.useState(true);
@@ -161,6 +162,33 @@ export default function Sandbox() {
                     thumbnail={cardPlaceholderImg}
                     name="Translating Node"
                     description="This node moves along an infinite linear track. Constrained, for eternity, to a life of 1d." />
+            </ListItem>
+            <ListDivider />
+            <ListItem>
+                <Grid container wrap="wrap" gap={1} sx={{
+                    width: '100%',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                }}>
+                    <Grid>
+                        <SandboxCard id="link"
+                            addToggled={currentAdd === 7} onAddClick={() => setCurrentAdd(currentAdd === 7 ? -1 : 7)} drop={setDropTransfer} dragOver={gameDragOver} dragLeave={gameDragLeave} dragFilter={gameDragFilter}
+                            thumbnail={cardPlaceholderImg}
+                            name="Link" mode="square" />
+                    </Grid>
+                    <Grid>
+                        <SandboxCard id="label"
+                            addToggled={currentAdd === 8} onAddClick={() => setCurrentAdd(currentAdd === 8 ? -1 : 8)} drop={setDropTransfer} dragOver={gameDragOver} dragLeave={gameDragLeave} dragFilter={gameDragFilter}
+                            thumbnail={cardPlaceholderImg}
+                            name="Label" mode="square" />
+                    </Grid>
+                    <Grid>
+                        <SandboxCard id="comment"
+                            addToggled={currentAdd === 9} onAddClick={() => setCurrentAdd(currentAdd === 9 ? -1 : 9)} drop={setDropTransfer} dragOver={gameDragOver} dragLeave={gameDragLeave} dragFilter={gameDragFilter}
+                            thumbnail={cardPlaceholderImg}
+                            name="Comment" mode="square" />
+                    </Grid>
+                </Grid>
             </ListItem>
             <ListDivider />
             <ListItem>

@@ -10,6 +10,7 @@ import styles from "../styles/sandboxcard.module.css";
 import { styled } from '@mui/joy/styles';
 import IconButton from "@mui/joy/IconButton";
 import AddRounded from '@mui/icons-material/AddRounded';
+import classNames from "classnames";
 
 const ThumbnailAspectRatio = styled(AspectRatio)({
     width: 100
@@ -32,7 +33,7 @@ const HoverCard = styled(Card)(({ theme }) => ({
 export default function SandboxCard(props: {
     thumbnail: string | StaticImport,
     name: ReactNode,
-    description: ReactNode,
+    description?: ReactNode,
     addToggled?: boolean,
     onAddClick?: MouseEventHandler<HTMLButtonElement>,
     drop?: () => void,
@@ -40,6 +41,7 @@ export default function SandboxCard(props: {
     dragLeave?: () => void,
     dragFilter?: (target: HTMLElement) => boolean,
     id: string
+    mode?: "wide" | "square"
 }) {
     const rootRef = useRef(null as HTMLDivElement | null);
     const popupRef = useRef(null as HTMLDivElement | null);
@@ -188,11 +190,15 @@ export default function SandboxCard(props: {
         }
     }, [drop, dragLeave, dragOver, dragFilter, id]);
 
-    return (<HoverCard orientation="horizontal" variant="outlined" className={styles.card} ref={rootRef} onContextMenu={e => e.preventDefault()} onPointerDown={pointerDown}>
+    return (<HoverCard orientation={props.mode === "square" ? "vertical" : "horizontal"} variant="outlined" className={classNames(styles.card, { [styles.square]: props.mode === "square" })} ref={rootRef} onContextMenu={e => e.preventDefault()} onPointerDown={pointerDown}>
         <CardOverflow>
-            <ThumbnailAspectRatio ratio="1" flex>
-                <Image alt="" aria-hidden src={props.thumbnail} placeholder="blur" />
-            </ThumbnailAspectRatio>
+            {props.mode === "square" ?
+                null
+                :
+                <ThumbnailAspectRatio ratio="1" flex>
+                    <Image alt="" aria-hidden src={props.thumbnail} placeholder="blur" />
+                </ThumbnailAspectRatio>
+            }
             <AddIcon
                 aria-label="Toggle add on click"
                 size="md"
@@ -200,10 +206,14 @@ export default function SandboxCard(props: {
                 color="primary" onClick={props.onAddClick}>
                 <AddRounded />
             </AddIcon>
-        </CardOverflow>
-        <CardContent>
+        </CardOverflow >
+        <CardContent sx={{ alignItems: props.mode === "square" ? "center" : undefined }}>
+            {props.mode === "square" ?
+                <Image alt="" aria-hidden src={props.thumbnail} placeholder="blur" />
+                : null}
             <Typography fontWeight="md">{props.name}</Typography>
-            <Typography level="body-xs">{props.description}</Typography>
+            {!!props.description ?
+                <Typography level="body-xs">{props.description}</Typography> : null}
         </CardContent>
-    </HoverCard>);
+    </HoverCard >);
 }
