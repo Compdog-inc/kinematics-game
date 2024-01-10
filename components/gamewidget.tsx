@@ -15,6 +15,8 @@ export class GameWidgetNode {
     xdrag?: number;
     ydrag?: number;
     handles?: GameWidgetHandle[];
+    children: GameWidgetLink[];
+    parent: GameWidgetLink | null;
 
     constructor(id: number, x: number, y: number) {
         this.id = id;
@@ -26,6 +28,8 @@ export class GameWidgetNode {
         this.xdrag = undefined;
         this.ydrag = undefined;
         this.handles = undefined;
+        this.children = [];
+        this.parent = null;
     }
 }
 
