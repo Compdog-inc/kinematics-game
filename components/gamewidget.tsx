@@ -1427,6 +1427,14 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                     break;
                 }
             }
+            if (!anySelected) {
+                for (const link of state.current.simLinks) {
+                    if (link.selected) {
+                        anySelected = true;
+                        break;
+                    }
+                }
+            }
             if (anySelected && !hadSelection.current) {
                 hadSelection.current = true;
             } else if (!anySelected && hadSelection.current) {

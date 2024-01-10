@@ -60,6 +60,11 @@ export default function Sandbox() {
                                 widget.current.nodes.splice(i, 1);
                             }
                         }
+                        for (let i = widget.current.simLinks.length - 1; i >= 0; i--) {
+                            if (widget.current.simLinks[i].selected) {
+                                widget.current.simLinks.splice(i, 1);
+                            }
+                        }
                         if (widget.current.updateSelection)
                             widget.current.updateSelection();
                         if (widget.current.render)
@@ -327,6 +332,11 @@ export default function Sandbox() {
                                     for (let i = widget.current.nodes.length - 1; i >= 0; i--) {
                                         if (widget.current.nodes[i].selected) {
                                             widget.current.nodes.splice(i, 1);
+                                        }
+                                    }
+                                    for (let i = widget.current.simLinks.length - 1; i >= 0; i--) {
+                                        if (widget.current.simLinks[i].selected) {
+                                            widget.current.simLinks.splice(i, 1);
                                         }
                                     }
                                     if (widget.current.updateSelection)
