@@ -1,5 +1,7 @@
-import { GameWidgetArcTranslatingNode, GameWidgetClampedNode, GameWidgetClampedTranslatingNode, GameWidgetNode, GameWidgetPolygonalTranslatingNode, GameWidgetRotatingNode, GameWidgetTranslatingNode, HTMLGameWidget } from "../components/gamewidget";
+import { GameWidgetArcTranslatingNode, GameWidgetClampedNode, GameWidgetClampedTranslatingNode, GameWidgetLink, GameWidgetNode, GameWidgetPolygonalTranslatingNode, GameWidgetRotatingNode, GameWidgetTranslatingNode, HTMLGameWidget } from "../components/gamewidget";
 import { Buffer } from "buffer";
+
+export const SERIALIZER_VERSION = 2;
 
 export const getNodeSize = (node: GameWidgetNode): number => {
     const headerSize = 17; // [id:1][x:8][y:8]
@@ -26,24 +28,27 @@ export const getNodeSize = (node: GameWidgetNode): number => {
 };
 
 export const fromSimulation = (data: HTMLGameWidget): Buffer => {
-    const headerLength = 36; // [bounds.left:8][bounds.top:8][bounds.right:8][bounds.bottom:8][nodes.length:4]
+    const headerLength = 41; // [version:1][bounds.left:8][bounds.top:8][bounds.right:8][bounds.bottom:8][nodes.length:4][simlinks.length:4]
 
     let bodyLength = 0;
     for (const node of data.nodes) {
         bodyLength += getNodeSize(node);
     }
+    bodyLength += data.simLinks.length * 32; // [x1:8][y1:8][x2:8][y2:8]
 
     const buffer = Buffer.allocUnsafe(headerLength + bodyLength);
 
     /// ========== BEGIN HEADER (0) ============
-    buffer.writeDoubleLE(data.bounds.left, 0);
-    buffer.writeDoubleLE(data.bounds.top, 8);
-    buffer.writeDoubleLE(data.bounds.right, 16);
-    buffer.writeDoubleLE(data.bounds.bottom, 24);
-    buffer.writeUInt32LE(data.nodes.length, 32);
+    buffer[0] = SERIALIZER_VERSION;
+    buffer.writeDoubleLE(data.bounds.left, 1);
+    buffer.writeDoubleLE(data.bounds.top, 9);
+    buffer.writeDoubleLE(data.bounds.right, 17);
+    buffer.writeDoubleLE(data.bounds.bottom, 25);
+    buffer.writeUInt32LE(data.nodes.length, 33);
+    buffer.writeUInt32LE(data.simLinks.length, 37);
     /// ============= END HEADER ===============
 
-    let offset = 36;
+    let offset = headerLength;
     for (const node of data.nodes) {
 
         /// ========== BEGIN NODE HEADER ============
@@ -108,20 +113,35 @@ export const fromSimulation = (data: HTMLGameWidget): Buffer => {
         }
     }
 
+    for (const link of data.simLinks) {
+        /// ========== BEGIN LINK HEADER ============
+        offset = buffer.writeDoubleLE(link.x1, offset);
+        offset = buffer.writeDoubleLE(link.y1, offset);
+        offset = buffer.writeDoubleLE(link.x2, offset);
+        offset = buffer.writeDoubleLE(link.y2, offset);
+        /// =========== END LINK HEADER =============
+    }
+
     return buffer;
 };
 
 export const toSimulation = (buffer: Buffer, data: HTMLGameWidget) => {
     /// ========== BEGIN HEADER (0) ============
-    data.bounds.left = buffer.readDoubleLE(0);
-    data.bounds.top = buffer.readDoubleLE(8);
-    data.bounds.right = buffer.readDoubleLE(16);
-    data.bounds.bottom = buffer.readDoubleLE(24);
-    const nodeCount = buffer.readUint32LE(32);
+    const version = buffer[0];
+    if (version <= 0 || version > SERIALIZER_VERSION) {
+        return;
+    }
+    data.bounds.left = buffer.readDoubleLE(1);
+    data.bounds.top = buffer.readDoubleLE(9);
+    data.bounds.right = buffer.readDoubleLE(17);
+    data.bounds.bottom = buffer.readDoubleLE(25);
+    const nodeCount = buffer.readUint32LE(33);
+    const linkCount = version >= 2 ? buffer.readUint32LE(37) : 0;
     /// ============= END HEADER ===============
 
-    let offset = 36;
+    let offset = version >= 2 ? 41 : 37;
     let nodes: GameWidgetNode[] = new Array(nodeCount);
+    let links: GameWidgetLink[] = new Array(linkCount);
     for (let i = 0; i < nodeCount; ++i) {
         /// ========== BEGIN NODE HEADER ============
         const id = buffer[offset++];
@@ -190,7 +210,18 @@ export const toSimulation = (buffer: Buffer, data: HTMLGameWidget) => {
         nodes[i] = node;
     }
 
+    for (let i = 0; i < linkCount; ++i) {
+        /// ========== BEGIN LINK HEADER ============
+        const x1 = buffer.readDoubleLE(offset); offset += 8;
+        const y1 = buffer.readDoubleLE(offset); offset += 8;
+        const x2 = buffer.readDoubleLE(offset); offset += 8;
+        const y2 = buffer.readDoubleLE(offset); offset += 8;
+        /// =========== END LINK HEADER =============
+        links[i] = new GameWidgetLink(x1, y1, x2, y2, null, null);
+    }
+
     data.nodes = nodes;
+    data.simLinks = links;
 };
 
 export const fromSimulationUrl = async (data: HTMLGameWidget): Promise<string> => {
