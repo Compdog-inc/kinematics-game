@@ -1566,6 +1566,7 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                                 deleteHandle(state.current, node, node.handles[i]);
                                 node.handles = getHandles(state.current, node);
                             }
+                            updateLinkPosition(node);
                         }
                     }
                 }
@@ -1851,6 +1852,7 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                                 node.handles[i].y = (node.handles[i].ydrag || 0) + dy;
                                 updateHandle(state.current, node, node.handles[i]);
                                 node.handles = getHandles(state.current, node);
+                                updateLinkPosition(node);
                             }
                         }
                     }
