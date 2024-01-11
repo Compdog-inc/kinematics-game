@@ -529,11 +529,24 @@ const updateNodePosition = (state: HTMLGameWidget, node: GameWidgetNode) => {
     }
 };
 
-export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect, onNodeSelectionClear }: {
+const updateLinkPosition = (node: GameWidgetNode) => {
+    if (node.parent != null) {
+        node.parent.x2 = node.x;
+        node.parent.y2 = node.y;
+    }
+
+    for (const link of node.children) {
+        link.x1 = node.x;
+        link.y1 = node.y;
+    }
+};
+
+export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect, onNodeSelectionClear, onOpError }: {
     drag?: boolean,
     stref?: (o: HTMLGameWidget | null) => any | undefined,
     onNodeSelect?: () => void,
-    onNodeSelectionClear?: () => void
+    onNodeSelectionClear?: () => void,
+    onOpError?: (err: string) => void
 }, ref: React.ForwardedRef<HTMLCanvasElement>) {
     const canvasElem = React.useRef(null as HTMLCanvasElement | null);
     const hadSelection = React.useRef(false);
@@ -1678,7 +1691,100 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                 link.dragging = false;
             }
         }
-    }, [state, render]);
+
+        // update simlinks
+        if (state.current.worldToPx) {
+            for (const link of state.current.simLinks) {
+                let lp = state.current.worldToPx(link.x1, link.y1);
+                let lc = state.current.worldToPx(link.x2, link.y2);
+                if (lp && lc) {
+                    if (link.parent != null) {
+                        const np = state.current.worldToPx(link.parent.x, link.parent.y);
+                        if (np) {
+                            const ndx = lp.x - np.x;
+                            const ndy = lp.y - np.y;
+                            if (ndx * ndx + ndy * ndy > 400) {
+                                const ind = link.parent.children.indexOf(link);
+                                if (ind === -1)
+                                    console.warn("Unexpected: missing child in link parent");
+                                else
+                                    link.parent.children.splice(ind, 1);
+                                link.parent = null;
+                            }
+                        }
+                    }
+
+                    if (link.child != null) {
+                        const np = state.current.worldToPx(link.child.x, link.child.y);
+                        if (np) {
+                            const ndx = lp.x - np.x;
+                            const ndy = lp.y - np.y;
+                            if (ndx * ndx + ndy * ndy > 400) {
+                                link.child.parent = null;
+                                link.child = null;
+                            }
+                        }
+                    }
+
+                    for (const node of state.current.nodes) {
+                        const np = state.current.worldToPx(node.x, node.y);
+                        if (np) {
+                            const npdx = lp.x - np.x;
+                            const npdy = lp.y - np.y;
+                            const ncdx = lc.x - np.x;
+                            const ncdy = lc.y - np.y;
+                            if (npdx * npdx + npdy * npdy <= 400) {
+                                link.parent = node;
+                                if (!node.children.includes(link))
+                                    node.children.push(link);
+                            }
+                            if (ncdx * ncdx + ncdy * ncdy <= 400) {
+                                if (node.parent != null && node.parent !== link) {
+                                    // assume user is trying to parent link instead of child:
+                                    // flip parent and child edges of link, keeping the same visual appearance
+                                    console.info("Attempted to attach child node that already has a parent! Flipping link to preserve visual appearance over structure.");
+                                    if (link.parent != null) {
+                                        const ind = link.parent.children.indexOf(link);
+                                        if (ind === -1)
+                                            console.warn("Unexpected: missing child in link parent");
+                                        else
+                                            link.parent.children.splice(ind, 1);
+                                        if (link.parent.parent != null) {
+                                            console.warn("[FLIP_TO_PARENTED_NODE] Invalid link tree! This will result in disconnected links.");
+                                            if (onOpError)
+                                                onOpError("Operation resulted in an invalid link tree! This will result in disconnected links.");
+                                        }
+                                        link.parent.parent = link;
+                                    }
+                                    link.child = link.parent;
+                                    link.parent = node;
+                                    if (!node.children.includes(link))
+                                        node.children.push(link);
+
+                                    let tmp = link.x1;
+                                    link.x1 = link.x2;
+                                    link.x2 = tmp;
+                                    tmp = link.y1;
+                                    link.y1 = link.y2;
+                                    link.y2 = tmp;
+                                    const tmp2: { x: number, y: number } = lp;
+                                    lp = lc;
+                                    lc = tmp2;
+                                } else {
+                                    link.child = node;
+                                    node.parent = link;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        for (const node of state.current.nodes) {
+            updateLinkPosition(node);
+        }
+    }, [state, render, onOpError]);
 
     const pointerMove = React.useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
         const bounds = e.currentTarget.getBoundingClientRect();
@@ -1726,6 +1832,7 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
 
                         calculateClosestNode(state.current, node);
                         updateNodePosition(state.current, node);
+                        updateLinkPosition(node);
 
                         if (node.id === 6) // polygonal translating
                         {
