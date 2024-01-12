@@ -180,6 +180,7 @@ export interface HTMLGameWidget {
         bottom: number
     };
     addOnClickId: number | string;
+    addOnClickLink: GameWidgetLink | null;
     dropId: number;
     dropLink: boolean;
     render?: () => void;
@@ -570,6 +571,7 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
             bottom: -5
         },
         addOnClickId: -1,
+        addOnClickLink: null,
         dropId: -1,
         dropLink: false,
         nodes: [],
@@ -708,6 +710,9 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
 
             if (state.current.worldToPx) {
                 // draw simulation links
+                if (state.current.addOnClickLink != null)
+                    drawLink(state.current.addOnClickLink);
+
                 for (const link of state.current.simLinks) {
                     drawLink(link);
                 }
@@ -1358,7 +1363,7 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                         drawNodeTemplate(state.current.dropId, worldMouse.x, worldMouse.y);
                     } else if (typeof (state.current.addOnClickId) === 'number' && state.current.addOnClickId !== -1) {
                         drawNodeTemplate(state.current.addOnClickId, worldMouse.x, worldMouse.y);
-                    } else if (state.current.addOnClickId === 'link' || state.current.dropLink) {
+                    } else if ((state.current.addOnClickId === 'link' || state.current.dropLink) && state.current.addOnClickLink == null) {
                         drawLinkTemplate(worldMouse.x, worldMouse.y);
                     }
                 }
@@ -1635,12 +1640,15 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
         if (dx <= 5 && dy <= 5) {
             if (state.current.dropId === -1 && state.current.addOnClickId !== -1 && state.current.useMp) {
                 let anyOver = false;
+                let overNode: GameWidgetNode | null = null;
                 for (const node of state.current.nodes) {
                     if (node.hover && node.selected) {
                         anyOver = true;
+                        overNode = node;
                         break;
                     }
                 }
+
                 if (!anyOver) {
                     for (const link of state.current.simLinks) {
                         if (link.hover && link.selected) {
@@ -1668,6 +1676,37 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                                 null
                             ));
                         }
+                        requestAnimationFrame(render);
+                    }
+                } else if (overNode != null) {
+                    if (state.current.addOnClickLink == null) {
+                        const world = state.current.pxToWorld ? state.current.pxToWorld(state.current.mx, state.current.my) : null;
+                        if (world) {
+                            if (state.current.addOnClickId === 'link') {
+                                const linkP = new GameWidgetLink(
+                                    overNode.x,
+                                    overNode.y,
+                                    world.x,
+                                    world.y,
+                                    overNode,
+                                    null
+                                );
+                                overNode.children.push(linkP);
+                                state.current.addOnClickLink = linkP;
+                            }
+                            requestAnimationFrame(render);
+                        }
+                    } else if (state.current.addOnClickId === 'link') {
+                        state.current.addOnClickLink.child = overNode;
+                        state.current.addOnClickLink.x2 = overNode.x;
+                        state.current.addOnClickLink.y2 = overNode.y;
+                        if (overNode.parent != null) {
+                            if (onOpError)
+                                onOpError("Operation resulted in an invalid link tree! This will result in disconnected links.");
+                        }
+                        overNode.parent = state.current.addOnClickLink;
+                        state.current.simLinks.push(state.current.addOnClickLink);
+                        state.current.addOnClickLink = null;
                         requestAnimationFrame(render);
                     }
                 }
@@ -1938,6 +1977,13 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
 
             requestAnimationFrame(render);
         } else if (state.current.addOnClickId !== -1) {
+            if (state.current.addOnClickLink != null) {
+                const world = state.current.pxToWorld ? state.current.pxToWorld(state.current.mx, state.current.my) : null;
+                if (world) {
+                    state.current.addOnClickLink.x2 = world.x;
+                    state.current.addOnClickLink.y2 = world.y;
+                }
+            }
             requestAnimationFrame(render);
         } else if (state.current.worldToPx) {
             // check for hover
