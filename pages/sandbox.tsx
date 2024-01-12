@@ -1,5 +1,5 @@
 import Head from "next/head";
-import GameWidget, { HTMLGameWidget, mapDefaultNode, getHandles, GameWidgetNode, GameWidgetLink } from "../components/gamewidget";
+import GameWidget, { HTMLGameWidget, mapDefaultNode, getHandles, GameWidgetNode, GameWidgetLink, updateLink } from "../components/gamewidget";
 import Box from "@mui/joy/Box";
 import Drawer from "@mui/joy/Drawer";
 import IconButton from "@mui/joy/IconButton";
@@ -114,6 +114,7 @@ export default function Sandbox() {
                         null
                     );
                     link.selected = true;
+                    updateLink(link);
                     widget.current.simLinks.push(link);
                 } else {
                     const ref = new GameWidgetNode(

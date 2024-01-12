@@ -38,6 +38,7 @@ export class GameWidgetLink {
     y1: number;
     x2: number;
     y2: number;
+    length: number;
     // arbitrary parent/child relationship for kinematics/inverse kinematics
     parent: GameWidgetNode | null;
     child: GameWidgetNode | null;
@@ -55,6 +56,7 @@ export class GameWidgetLink {
         this.y1 = y1;
         this.x2 = x2;
         this.y2 = y2;
+        this.length = 0;
         this.parent = parent;
         this.child = child;
         this.hover = false;
@@ -542,6 +544,35 @@ const updateLinkPosition = (node: GameWidgetNode) => {
     }
 };
 
+export const updateLink = (link: GameWidgetLink) => {
+    const dx = link.x2 - link.x1;
+    const dy = link.y2 - link.y1;
+    link.length = Math.sqrt(dx * dx + dy * dy);
+}
+
+const solveKinematics = (node: GameWidgetNode) => {
+    switch (node.id) {
+        case 3: // rotating node
+            {
+                const tmp = (node as GameWidgetRotatingNode);
+                for (const link of node.children) {
+                    const dx = link.x2 - node.x;
+                    const dy = link.y2 - node.y;
+                    const angle = Math.atan2(dy, dx);
+
+                    link.x2 = link.length * Math.cos(angle) + link.x1;
+                    link.y2 = link.length * Math.sin(angle) + link.y1;
+
+                    if (link.child != null) {
+                        link.child.x = link.x2;
+                        link.child.y = link.y2;
+                    }
+                }
+            }
+            break;
+    }
+};
+
 export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect, onNodeSelectionClear, onOpError }: {
     drag?: boolean,
     stref?: (o: HTMLGameWidget | null) => any | undefined,
@@ -665,6 +696,9 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                     if (p1 && p2) {
                         const cx = (p1.x + p2.x) / 2;
                         const cy = (p1.y + p2.y) / 2;
+                        ctx.fillStyle = "#88f";
+                        ctx.font = "38px Helvetica";
+                        ctx.fillText(link.length.toPrecision(3), cx, cy - 20);
                         ctx.beginPath();
                         ctx.moveTo(link.dragTarget === 'child' ? p1.x : cx, link.dragTarget === 'child' ? p1.y : cy);
                         ctx.lineTo(link.dragTarget === 'child' ? cx : p2.x, link.dragTarget === 'child' ? cy : p2.y);
@@ -1597,15 +1631,12 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                         const closest = closestDeltaOnSegment(state.current.mx, state.current.my, p1.x, p1.y, p2.x, p2.y);
                         link.xdrag = link.x1 * (1 - closest) + link.x2 * closest;
                         link.ydrag = link.y1 * (1 - closest) + link.y2 * closest;
-                        const ndx = link.x2 - link.x1;
-                        const ndy = link.y2 - link.y1;
-                        const length = Math.sqrt(ndx * ndx + ndy * ndy);
                         if (closest < 0.5) {
                             link.dragTarget = "parent";
-                            link.edgeOffset = closest * length;
+                            link.edgeOffset = closest * link.length;
                         } else {
                             link.dragTarget = "child";
-                            link.edgeOffset = (1 - closest) * length;
+                            link.edgeOffset = (1 - closest) * link.length;
                         }
                     }
                 }
@@ -1667,14 +1698,16 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                                 world.y
                             )));
                         } else if (state.current.addOnClickId === 'link') {
-                            state.current.simLinks.push(new GameWidgetLink(
+                            const link = new GameWidgetLink(
                                 world.x - 1,
                                 world.y,
                                 world.x + 1,
                                 world.y,
                                 null,
                                 null
-                            ));
+                            );
+                            updateLink(link);
+                            state.current.simLinks.push(link);
                         }
                         requestAnimationFrame(render);
                     }
@@ -1706,6 +1739,7 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                         }
                         overNode.parent = state.current.addOnClickLink;
                         state.current.simLinks.push(state.current.addOnClickLink);
+                        updateLink(state.current.addOnClickLink);
                         state.current.addOnClickLink = null;
                         requestAnimationFrame(render);
                     }
@@ -1873,6 +1907,14 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                         calculateClosestNode(state.current, node);
                         updateNodePosition(state.current, node);
                         updateLinkPosition(node);
+                        solveKinematics(node);
+                        calculateClosestNode(state.current, node);
+                        updateNodePosition(state.current, node);
+                        updateLinkPosition(node);
+                        for (const link of node.children)
+                            updateLink(link);
+                        if (node.parent)
+                            updateLink(node.parent);
 
                         if (node.id === 6) // polygonal translating
                         {
@@ -1892,6 +1934,10 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                                 updateHandle(state.current, node, node.handles[i]);
                                 node.handles = getHandles(state.current, node);
                                 updateLinkPosition(node);
+                                for (const link of node.children)
+                                    updateLink(link);
+                                if (node.parent)
+                                    updateLink(node.parent);
                             }
                         }
                     }
@@ -1956,6 +2002,7 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                                     }
                                 }
                             }
+                            updateLink(link);
                         }
                     }
                 }

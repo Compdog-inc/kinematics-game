@@ -1,4 +1,4 @@
-import { GameWidgetArcTranslatingNode, GameWidgetClampedNode, GameWidgetClampedTranslatingNode, GameWidgetLink, GameWidgetNode, GameWidgetPolygonalTranslatingNode, GameWidgetRotatingNode, GameWidgetTranslatingNode, HTMLGameWidget } from "../components/gamewidget";
+import { GameWidgetArcTranslatingNode, GameWidgetClampedNode, GameWidgetClampedTranslatingNode, GameWidgetLink, GameWidgetNode, GameWidgetPolygonalTranslatingNode, GameWidgetRotatingNode, GameWidgetTranslatingNode, HTMLGameWidget, updateLink } from "../components/gamewidget";
 import { Buffer } from "buffer";
 
 export const SERIALIZER_VERSION = 2;
@@ -245,6 +245,7 @@ export const toSimulation = (buffer: Buffer, data: HTMLGameWidget) => {
             parentInd === 0 ? null : nodes[parentInd - 1],
             childInd === 0 ? null : nodes[childInd - 1]
         );
+        updateLink(links[i]);
     }
 
     for (const node of nodes) {
