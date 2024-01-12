@@ -550,11 +550,10 @@ export const updateLink = (link: GameWidgetLink) => {
     link.length = Math.sqrt(dx * dx + dy * dy);
 }
 
-const solveKinematics = (node: GameWidgetNode) => {
+const solveKinematics = (state: HTMLGameWidget, node: GameWidgetNode) => {
     switch (node.id) {
-        case 3: // rotating node
+        case 1: // rotating node
             {
-                const tmp = (node as GameWidgetRotatingNode);
                 for (const link of node.children) {
                     const dx = link.x2 - node.x;
                     const dy = link.y2 - node.y;
@@ -570,6 +569,84 @@ const solveKinematics = (node: GameWidgetNode) => {
                 }
             }
             break;
+        case 2: // translating node
+            {
+                for (const link of node.children) {
+                    const dx = link.x2 - node.x;
+                    const dy = link.y2 - node.y;
+                    const angle = Math.atan2(dy, dx);
+
+                    link.x2 = link.length * Math.cos(angle) + link.x1;
+                    link.y2 = link.length * Math.sin(angle) + link.y1;
+
+                    if (link.child != null) {
+                        link.child.x = link.x2;
+                        link.child.y = link.y2;
+                    }
+                }
+            }
+            break;
+        case 3: // clamped node
+            {
+                const tmp = (node as GameWidgetClampedNode);
+                for (const link of node.children) {
+                    const dx = link.x2 - node.x;
+                    const dy = link.y2 - node.y;
+                    let angle = Math.atan2(dy, dx);
+
+                    let realMin = 0;
+                    let realMax = (tmp.maxAngle - tmp.minAngle) * Math.PI / 180;
+                    if (realMax < 0) {
+                        realMax += 2 * Math.PI;
+                    }
+                    let normAngle = angle;
+                    if (normAngle > -Math.PI / 2 && normAngle < 0) {
+                        normAngle = Math.PI + normAngle;
+                    }
+                    normAngle = normAngle - Math.PI / 2;
+                    let realAngle = normAngle - tmp.minAngle * Math.PI / 180;
+                    if (realAngle < 0) {
+                        realAngle += Math.PI * 2;
+                    } else if (realAngle > Math.PI * 2) {
+                        realAngle %= Math.PI * 2;
+                    }
+                    angle = Math.max(realMin, Math.min(realMax, realAngle)) + tmp.minAngle * Math.PI / 180 + Math.PI / 2;
+
+                    link.x2 = link.length * Math.cos(angle) + link.x1;
+                    link.y2 = link.length * Math.sin(angle) + link.y1;
+
+                    if (link.child != null) {
+                        link.child.x = link.x2;
+                        link.child.y = link.y2;
+                    }
+                }
+            }
+            break;
+        case 4: // rotating node
+            {
+                for (const link of node.children) {
+                    const dx = link.x2 - node.x;
+                    const dy = link.y2 - node.y;
+                    const angle = Math.atan2(dy, dx);
+
+                    link.x2 = link.length * Math.cos(angle) + link.x1;
+                    link.y2 = link.length * Math.sin(angle) + link.y1;
+
+                    if (link.child != null) {
+                        link.child.x = link.x2;
+                        link.child.y = link.y2;
+                    }
+                }
+            }
+            break;
+    }
+    calculateClosestNode(state, node);
+    updateNodePosition(state, node);
+    updateLinkPosition(node);
+    for (const link of node.children) {
+        if (link.child) {
+            solveKinematics(state, link.child);
+        }
     }
 };
 
@@ -1907,10 +1984,7 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                         calculateClosestNode(state.current, node);
                         updateNodePosition(state.current, node);
                         updateLinkPosition(node);
-                        solveKinematics(node);
-                        calculateClosestNode(state.current, node);
-                        updateNodePosition(state.current, node);
-                        updateLinkPosition(node);
+                        solveKinematics(state.current, node);
                         for (const link of node.children)
                             updateLink(link);
                         if (node.parent)
