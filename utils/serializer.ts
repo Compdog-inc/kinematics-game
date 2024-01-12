@@ -4,7 +4,7 @@ import { Buffer } from "buffer";
 export const SERIALIZER_VERSION = 2;
 
 export const getNodeSize = (node: GameWidgetNode): number => {
-    const headerSize = 17; // [id:1][x:8][y:8]
+    const headerSize = 25 + node.children.length * 4; // [id:1][x:8][y:8][parent:4][childCount:4]{[child:4]}
     switch (node.id) {
         case 0: // fixed node
             return headerSize;
@@ -34,7 +34,7 @@ export const fromSimulation = (data: HTMLGameWidget): Buffer => {
     for (const node of data.nodes) {
         bodyLength += getNodeSize(node);
     }
-    bodyLength += data.simLinks.length * 32; // [x1:8][y1:8][x2:8][y2:8]
+    bodyLength += data.simLinks.length * 40; // [x1:8][y1:8][x2:8][y2:8][parent:4][child:4]
 
     const buffer = Buffer.allocUnsafe(headerLength + bodyLength);
 
@@ -55,6 +55,11 @@ export const fromSimulation = (data: HTMLGameWidget): Buffer => {
         buffer[offset++] = node.id;
         offset = buffer.writeDoubleLE(node.x, offset);
         offset = buffer.writeDoubleLE(node.y, offset);
+        offset = buffer.writeUint32LE(node.parent === null ? 0 : data.simLinks.indexOf(node.parent) + 1, offset);
+        offset = buffer.writeUint32LE(node.children.length, offset);
+        for (const child of node.children) {
+            offset = buffer.writeUint32LE(data.simLinks.indexOf(child) + 1, offset);
+        }
         /// =========== END NODE HEADER =============
 
         switch (node.id) {
@@ -119,6 +124,8 @@ export const fromSimulation = (data: HTMLGameWidget): Buffer => {
         offset = buffer.writeDoubleLE(link.y1, offset);
         offset = buffer.writeDoubleLE(link.x2, offset);
         offset = buffer.writeDoubleLE(link.y2, offset);
+        offset = buffer.writeUint32LE(link.parent === null ? 0 : data.nodes.indexOf(link.parent) + 1, offset);
+        offset = buffer.writeUint32LE(link.child === null ? 0 : data.nodes.indexOf(link.child) + 1, offset);
         /// =========== END LINK HEADER =============
     }
 
@@ -147,9 +154,24 @@ export const toSimulation = (buffer: Buffer, data: HTMLGameWidget) => {
         const id = buffer[offset++];
         const x = buffer.readDoubleLE(offset); offset += 8;
         const y = buffer.readDoubleLE(offset); offset += 8;
+        let parentInd = 0;
+        let childrenInds: number[] = [];
+        if (version >= 2) { // Link relationships
+            parentInd = buffer.readUint32LE(offset); offset += 4;
+            const childCount = buffer.readUint32LE(offset); offset += 4;
+            childrenInds = new Array(childCount);
+            for (let k = 0; k < childCount; ++k) {
+                childrenInds[k] = buffer.readUint32LE(offset); offset += 4;
+            }
+        }
         /// =========== END NODE HEADER =============
 
         const node: GameWidgetNode = new GameWidgetNode(id, x, y);
+
+        // Temparary unsafe assignment to cache indices
+        (node as any).parent = parentInd;
+        (node as any).children = childrenInds;
+
         switch (id) {
             case 0: // fixed node
                 /// ========== BEGIN NODE BODY ============
@@ -216,8 +238,27 @@ export const toSimulation = (buffer: Buffer, data: HTMLGameWidget) => {
         const y1 = buffer.readDoubleLE(offset); offset += 8;
         const x2 = buffer.readDoubleLE(offset); offset += 8;
         const y2 = buffer.readDoubleLE(offset); offset += 8;
+        const parentInd = buffer.readUint32LE(offset); offset += 4;
+        const childInd = buffer.readUint32LE(offset); offset += 4;
         /// =========== END LINK HEADER =============
-        links[i] = new GameWidgetLink(x1, y1, x2, y2, null, null);
+        links[i] = new GameWidgetLink(x1, y1, x2, y2,
+            parentInd === 0 ? null : nodes[parentInd - 1],
+            childInd === 0 ? null : nodes[childInd - 1]
+        );
+    }
+
+    for (const node of nodes) {
+        const parentInd: number = (node as any).parent;
+        if (parentInd === 0)
+            node.parent = null;
+        else
+            node.parent = links[parentInd - 1];
+        const childInds: number[] = (node as any).children;
+        const children: GameWidgetLink[] = new Array(childInds.length);
+        for (let k = 0; k < childInds.length; ++k) {
+            children[k] = links[childInds[k] - 1];
+        }
+        node.children = children;
     }
 
     data.nodes = nodes;
