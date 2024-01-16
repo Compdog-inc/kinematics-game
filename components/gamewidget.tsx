@@ -773,9 +773,6 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                     if (p1 && p2) {
                         const cx = (p1.x + p2.x) / 2;
                         const cy = (p1.y + p2.y) / 2;
-                        ctx.fillStyle = "#88f";
-                        ctx.font = "38px Helvetica";
-                        ctx.fillText(link.length.toPrecision(3), cx, cy - 20);
                         ctx.beginPath();
                         ctx.moveTo(link.dragTarget === 'child' ? p1.x : cx, link.dragTarget === 'child' ? p1.y : cy);
                         ctx.lineTo(link.dragTarget === 'child' ? cx : p2.x, link.dragTarget === 'child' ? cy : p2.y);
@@ -796,6 +793,15 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                         ctx.lineWidth = link.hover ? 11 : 8;
                         ctx.stroke()
                         ctx.lineCap = "butt";
+
+                        ctx.fillStyle = (state.current.theme === 'dark' && !state.current.forceLight) ?
+                            '#858699' :
+                            '#595966';
+                        ctx.font = "38px Helvetica";
+                        const label = ctx.measureText(link.length.toPrecision(3));
+                        const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+                        const swap = angle < -Math.PI / 2 || angle > Math.PI / 2;
+                        ctx.fillText(link.length.toPrecision(3), cx - label.width / 2 + (swap ? -1 : 1) * label.width * Math.sin(angle), cy - (label.actualBoundingBoxDescent - label.actualBoundingBoxAscent) / 2 - 30);
                     }
                 }
             };
