@@ -1,5 +1,5 @@
 import Head from "next/head";
-import GameWidget, { HTMLGameWidget, mapDefaultNode, getHandles } from "../components/gamewidget";
+import GameWidget, { HTMLGameWidget, mapDefaultNode, getHandles, GameWidgetNode, GameWidgetLink, updateLink } from "../components/gamewidget";
 import Box from "@mui/joy/Box";
 import Drawer from "@mui/joy/Drawer";
 import IconButton from "@mui/joy/IconButton";
@@ -12,6 +12,8 @@ import IosShareRounded from '@mui/icons-material/IosShareRounded';
 import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import RemoveCircleOutlineRoundedIcon from '@mui/icons-material/RemoveCircleOutlineRounded';
+import WarningIcon from '@mui/icons-material/Warning';
+import CloseIcon from '@mui/icons-material/Close';
 import styles from "../styles/sandbox.module.css";
 import classNames from "classnames";
 import List from "@mui/joy/List";
@@ -28,10 +30,12 @@ import Typography from "@mui/joy/Typography";
 import Input from "@mui/joy/Input";
 import Button from "@mui/joy/Button";
 import { fromSimulationUrl, toSimulationUrl } from "../utils/serializer";
+import Grid from "@mui/joy/Grid";
+import Alert from "@mui/joy/Alert";
 
 export default function Sandbox() {
     const [open, setOpen] = React.useState(true);
-    const [currentAdd, setCurrentAdd] = React.useState(-1);
+    const [currentAdd, setCurrentAdd] = React.useState(-1 as number | string);
     const [shareUrl, setShareUrl] = React.useState("");
     const [copyBtnCopied, setCopyBtnCopied] = React.useState(false);
     const [showShareDialog, setShowShareDialog] = React.useState(false);
@@ -39,6 +43,9 @@ export default function Sandbox() {
     const [nodeSelected, setNodeSelected] = React.useState(false);
     const [polygonNodeSelected, setPolygonNodeSelected] = React.useState(false);
     const [polygonDelete, setPolygonDelete] = React.useState(false);
+    const [opError, setOpError] = React.useState("");
+    const [showError, setShowError] = React.useState(false);
+    const [hadError, setHadError] = React.useState(false);
 
     const shareUrlInput = React.useRef(null as HTMLInputElement | null);
 
@@ -57,6 +64,11 @@ export default function Sandbox() {
                         for (let i = widget.current.nodes.length - 1; i >= 0; i--) {
                             if (widget.current.nodes[i].selected) {
                                 widget.current.nodes.splice(i, 1);
+                            }
+                        }
+                        for (let i = widget.current.simLinks.length - 1; i >= 0; i--) {
+                            if (widget.current.simLinks[i].selected) {
+                                widget.current.simLinks.splice(i, 1);
                             }
                         }
                         if (widget.current.updateSelection)
@@ -92,18 +104,34 @@ export default function Sandbox() {
                 for (const n of widget.current.nodes) {
                     n.selected = false;
                 }
-                const node = mapDefaultNode({
-                    id: widget.current.dropId,
-                    x: world.x,
-                    y: world.y,
-                    selected: true
-                });
-                node.handles = getHandles(widget.current, node);
-                widget.current.nodes.push(node);
+                if (widget.current.dropLink) {
+                    const link = new GameWidgetLink(
+                        world.x - 1,
+                        world.y,
+                        world.x + 1,
+                        world.y,
+                        null,
+                        null
+                    );
+                    link.selected = true;
+                    updateLink(link);
+                    widget.current.simLinks.push(link);
+                } else {
+                    const ref = new GameWidgetNode(
+                        widget.current.dropId,
+                        world.x,
+                        world.y
+                    );
+                    ref.selected = true;
+                    const node = mapDefaultNode(ref);
+                    node.handles = getHandles(widget.current, node);
+                    widget.current.nodes.push(node);
+                }
                 if (widget.current.updateSelection)
                     widget.current.updateSelection();
             }
             widget.current.dropId = -1;
+            widget.current.dropLink = false;
             if (widget.current.render)
                 requestAnimationFrame(widget.current.render);
         }
@@ -111,6 +139,15 @@ export default function Sandbox() {
 
     const gameDragOver = React.useCallback((e: globalThis.PointerEvent, id: string) => {
         if (widget.current && widgetCv.current) {
+            if (id === "link") {
+                widget.current.dropLink = true;
+                const bounds = widgetCv.current.getBoundingClientRect();
+                widget.current.mx = (e.clientX - bounds.left) * 2;
+                widget.current.my = (e.clientY - bounds.top) * 2;
+                widget.current.useMp = true;
+            } else {
+                widget.current.dropLink = false;
+            }
             if (!isNaN(parseInt(id)) && !isNaN(Number(id))) {
                 widget.current.dropId = Number(id);
                 const bounds = widgetCv.current.getBoundingClientRect();
@@ -129,6 +166,7 @@ export default function Sandbox() {
     const gameDragLeave = React.useCallback(() => {
         if (widget.current) {
             widget.current.dropId = -1;
+            widget.current.dropLink = false;
             widget.current.useMp = false;
             if (widget.current.render)
                 requestAnimationFrame(widget.current.render);
@@ -161,6 +199,33 @@ export default function Sandbox() {
                     thumbnail={cardPlaceholderImg}
                     name="Translating Node"
                     description="This node moves along an infinite linear track. Constrained, for eternity, to a life of 1d." />
+            </ListItem>
+            <ListDivider />
+            <ListItem>
+                <Grid container wrap="wrap" gap={1} sx={{
+                    width: '100%',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                }}>
+                    <Grid>
+                        <SandboxCard id="link"
+                            addToggled={currentAdd === "link"} onAddClick={() => setCurrentAdd(currentAdd === "link" ? -1 : "link")} drop={setDropTransfer} dragOver={gameDragOver} dragLeave={gameDragLeave} dragFilter={gameDragFilter}
+                            thumbnail={cardPlaceholderImg}
+                            name="Link" mode="square" />
+                    </Grid>
+                    <Grid>
+                        <SandboxCard id="label"
+                            addToggled={currentAdd === "label"} onAddClick={() => setCurrentAdd(currentAdd === "label" ? -1 : "label")} drop={setDropTransfer} dragOver={gameDragOver} dragLeave={gameDragLeave} dragFilter={gameDragFilter}
+                            thumbnail={cardPlaceholderImg}
+                            name="Label" mode="square" />
+                    </Grid>
+                    <Grid>
+                        <SandboxCard id="comment"
+                            addToggled={currentAdd === "comment"} onAddClick={() => setCurrentAdd(currentAdd === "comment" ? -1 : "comment")} drop={setDropTransfer} dragOver={gameDragOver} dragLeave={gameDragLeave} dragFilter={gameDragFilter}
+                            thumbnail={cardPlaceholderImg}
+                            name="Comment" mode="square" />
+                    </Grid>
+                </Grid>
             </ListItem>
             <ListDivider />
             <ListItem>
@@ -216,8 +281,64 @@ export default function Sandbox() {
                             onNodeSelectionClear={() => {
                                 setNodeSelected(false);
                                 setPolygonNodeSelected(false);
+                            }}
+                            onOpError={(err) => {
+                                setOpError(err);
+                                setShowError(true);
+                                setHadError(true);
                             }} />
                     </div>
+                    {hadError ? <Alert
+                        startDecorator={<WarningIcon />}
+                        sx={{
+                            position: 'fixed',
+                            top: '0',
+                            left: '50%',
+                            transform: 'translate(-50%,-100%)',
+                            zIndex: 3,
+                            '@keyframes enter': {
+                                from: {
+                                    top: '0',
+                                    transform: 'translate(-50%,-100%)'
+                                },
+                                to: {
+                                    top: '110px',
+                                    transform: 'translate(-50%,0)'
+                                }
+                            },
+                            '@keyframes exit': {
+                                to: {
+                                    top: '0',
+                                    transform: 'translate(-50%,-100%)'
+                                },
+                                from: {
+                                    top: '110px',
+                                    transform: 'translate(-50%,0)'
+                                }
+                            },
+                            animation: 'exit .8s linear(0 0%, 0 1.8%, 0.01 3.6%, 0.03 6.35%, 0.07 9.1%, 0.13 11.4%, 0.19 13.4%, 0.27 15%, 0.34 16.1%, 0.54 18.35%, 0.66 20.6%, 0.72 22.4%, 0.77 24.6%, 0.81 27.3%, 0.85 30.4%, 0.88 35.1%, 0.92 40.6%, 0.94 47.2%, 0.96 55%, 0.98 64%, 0.99 74.4%, 1 86.4%, 1 100%) both'
+                        }}
+                        className={classNames({ [styles.alert]: showError })}
+                        variant="soft"
+                        color="danger"
+                        endDecorator={
+                            <React.Fragment>
+                                <Button variant="soft" color="danger" sx={{ mr: 1 }} onClick={() => setShowError(false)}>
+                                    Undo
+                                </Button>
+                                <IconButton variant="soft" size="sm" color="danger" onClick={() => setShowError(false)}>
+                                    <CloseIcon />
+                                </IconButton>
+                            </React.Fragment>
+                        }
+                    >
+                        <div>
+                            <div>Invalid Operation</div>
+                            <Typography level="body-sm" color={"danger"}>
+                                {opError}
+                            </Typography>
+                        </div>
+                    </Alert> : null}
                     <IconButton variant="plain" size="md" tabIndex={0} aria-label="Open drawer" onClick={() => setOpen(!open)} sx={{
                         position: 'fixed',
                         left: '5px',
@@ -274,6 +395,11 @@ export default function Sandbox() {
                                     for (let i = widget.current.nodes.length - 1; i >= 0; i--) {
                                         if (widget.current.nodes[i].selected) {
                                             widget.current.nodes.splice(i, 1);
+                                        }
+                                    }
+                                    for (let i = widget.current.simLinks.length - 1; i >= 0; i--) {
+                                        if (widget.current.simLinks[i].selected) {
+                                            widget.current.simLinks.splice(i, 1);
                                         }
                                     }
                                     if (widget.current.updateSelection)
@@ -460,7 +586,7 @@ export default function Sandbox() {
                         </Sheet>
                         {drawerContent}
                     </Drawer>
-                </Box>
+                </Box >
             </Box >
         </>
     )
