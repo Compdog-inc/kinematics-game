@@ -2008,6 +2008,7 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                                 updateHandle(state.current, node, node.handles[i]);
                                 node.handles = getHandles(state.current, node);
                                 updateLinkPosition(node);
+                                solveKinematics(state.current, node);
                                 for (const link of node.children)
                                     updateLink(link);
                                 if (node.parent)
