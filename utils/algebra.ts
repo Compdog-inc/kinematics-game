@@ -1,19 +1,31 @@
-export const closestDeltaOnSegment = (x: number, y: number, x1: number, y1: number, x2: number, y2: number) => {
+export const segmentFromPointAngle = (x: number, y: number, angle: number): { x1: number, y1: number, x2: number, y2: number } => {
+    return {
+        x1: x,
+        y1: y,
+        x2: Math.cos(angle) + x,
+        y2: Math.sin(angle) + y
+    };
+};
+
+export const closestDeltaOnSegment = (x: number, y: number, x1: number, y1: number, x2: number, y2: number, infinite?: boolean) => {
     const dx = x2 - x1;
     const ddx = x1 - x2;
     const dy = y2 - y1;
     const sdx = dx === 0 ? Number.EPSILON : dx;
     const sdy = dy === 0 ? Number.EPSILON : dy;
 
-    return Math.max(0, Math.min(1,
-        (
-            (y1 - dy * x1 / sdx - y + ddx * x / sdy)
-            /
-            (ddx / sdy - dy / sdx) - x1
-        )
+    const l = (
+        (y1 - dy * x1 / sdx - y + ddx * x / sdy)
         /
-        sdx
-    ));
+        (ddx / sdy - dy / sdx) - x1
+    )
+        /
+        sdx;
+
+    if (infinite)
+        return l;
+    else
+        return Math.max(0, Math.min(1, l));
 };
 
 export const distanceToSegmentSquared = (x: number, y: number, x1: number, y1: number, x2: number, y2: number) => {

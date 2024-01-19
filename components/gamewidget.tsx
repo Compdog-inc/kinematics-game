@@ -3,7 +3,7 @@ import Box from "@mui/joy/Box";
 import styles from '../styles/gamewidget.module.css';
 import React, { useEffect } from "react";
 import { useColorScheme } from "@mui/joy/styles";
-import { closestDeltaOnSegment, maximizeAngle, normalizeAngle, distanceToSegmentSquared } from "../utils/algebra";
+import { closestDeltaOnSegment, maximizeAngle, normalizeAngle, distanceToSegmentSquared, segmentFromPointAngle } from "../utils/algebra";
 
 export class GameWidgetNode {
     id: number;
@@ -93,11 +93,15 @@ export class GameWidgetRotatingNode extends GameWidgetNode {
 export class GameWidgetTranslatingNode extends GameWidgetNode {
     angle: number;
     delta: number;
+    cx: number;
+    cy: number;
 
-    constructor(x: number, y: number, angle: number, delta: number) {
+    constructor(x: number, y: number, angle: number, delta: number, cx: number, cy: number) {
         super(2, x, y);
         this.angle = angle;
         this.delta = delta;
+        this.cx = cx;
+        this.cy = cy;
     }
 }
 
@@ -204,6 +208,8 @@ export const mapDefaultNode = (node: GameWidgetNode): GameWidgetNode => {
         case 2: // translating node
             (node as GameWidgetTranslatingNode).angle = 0;
             (node as GameWidgetTranslatingNode).delta = 0;
+            (node as GameWidgetTranslatingNode).cx = node.x;
+            (node as GameWidgetTranslatingNode).cy = node.y;
             break;
         case 3: // clamped node
             (node as GameWidgetClampedNode).minAngle = 0;
@@ -363,6 +369,9 @@ const updateHandle = (state: HTMLGameWidget, node: GameWidgetNode, handle: GameW
                         const x = (handle.x - px.x) / 120;
                         const y = (handle.y - px.y) / 120;
                         (node as GameWidgetTranslatingNode).angle = Math.atan2(y, x) * 180 / Math.PI;
+                        (node as GameWidgetTranslatingNode).delta = 0;
+                        (node as GameWidgetTranslatingNode).cx = node.x;
+                        (node as GameWidgetTranslatingNode).cy = node.y;
                     }
                     break;
                 case 3: // clamped node
@@ -489,6 +498,13 @@ const updateHandle = (state: HTMLGameWidget, node: GameWidgetNode, handle: GameW
 const calculateClosestNode = (state: HTMLGameWidget, node: GameWidgetNode) => {
     if (state) {
         switch (node.id) {
+            case 2: // translating node
+                {
+                    const tmp = (node as GameWidgetTranslatingNode);
+                    const segment = segmentFromPointAngle(tmp.cx, tmp.cy, -tmp.angle * Math.PI / 180);
+                    (node as GameWidgetTranslatingNode).delta = closestDeltaOnSegment(tmp.x, tmp.y, segment.x1, segment.y1, segment.x2, segment.y2, true);
+                }
+                break;
             case 4: // clamped translating node
                 {
                     const tmp = (node as GameWidgetClampedTranslatingNode);
@@ -511,6 +527,14 @@ const calculateClosestNode = (state: HTMLGameWidget, node: GameWidgetNode) => {
 const updateNodePosition = (state: HTMLGameWidget, node: GameWidgetNode) => {
     if (state) {
         switch (node.id) {
+            case 2: // translating node
+                {
+                    const tmp = (node as GameWidgetTranslatingNode);
+                    const angle = -tmp.angle * Math.PI / 180;
+                    node.x = tmp.delta * Math.cos(angle) + tmp.cx;
+                    node.y = tmp.delta * Math.sin(angle) + tmp.cy;
+                }
+                break;
             case 4: // clamped translating node
                 {
                     const tmp = (node as GameWidgetClampedTranslatingNode);
@@ -640,13 +664,61 @@ const solveKinematics = (state: HTMLGameWidget, node: GameWidgetNode) => {
             }
             break;
     }
+
     calculateClosestNode(state, node);
     updateNodePosition(state, node);
     updateLinkPosition(node);
     for (const link of node.children) {
+        if (link.child && link.parent) {
+            calculateClosestNode(state, link.child);
+            updateNodePosition(state, link.child);
+            updateLinkPosition(link.child);
+            const dx = link.child.x - node.x;
+            const dy = link.child.y - node.y;
+            const angle = Math.atan2(dy, dx);
+
+            link.x1 = -link.length * Math.cos(angle) + link.child.x;
+            link.y1 = -link.length * Math.sin(angle) + link.child.y;
+
+            node.x = link.x1;
+            node.y = link.y1;
+        }
         if (link.child) {
             solveKinematics(state, link.child);
         }
+    }
+};
+
+const solveInverseKinematics = (state: HTMLGameWidget, node: GameWidgetNode): GameWidgetNode => {
+    switch (node.id) {
+        default:
+            {
+                if (node.parent) {
+                    const dx = node.parent.x1 - node.x;
+                    const dy = node.parent.y1 - node.y;
+                    const angle = Math.atan2(dy, dx);
+
+                    node.parent.x1 = node.parent.length * Math.cos(angle) + node.parent.x2;
+                    node.parent.y1 = node.parent.length * Math.sin(angle) + node.parent.y2;
+
+                    if (node.parent.parent != null) {
+                        node.parent.parent.x = node.parent.x1;
+                        node.parent.parent.y = node.parent.y1;
+
+                        calculateClosestNode(state, node.parent.parent);
+                        updateNodePosition(state, node.parent.parent);
+                        updateLinkPosition(node.parent.parent);
+                    }
+                }
+            }
+            break;
+    }
+
+    if (node.parent && node.parent.parent) {
+        solveKinematics(state, node.parent.parent);
+        return solveInverseKinematics(state, node.parent.parent);
+    } else {
+        return node;
     }
 };
 
@@ -1987,10 +2059,17 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                         node.x = node.xdrag + wdx * Math.max(1, aspectScreen);
                         node.y = node.ydrag + wdy / Math.min(1, aspectScreen);
 
+                        if (node.id === 2) {
+                            (node as GameWidgetTranslatingNode).delta = 0;
+                            (node as GameWidgetTranslatingNode).cx = node.x;
+                            (node as GameWidgetTranslatingNode).cy = node.y;
+                        }
+
                         calculateClosestNode(state.current, node);
                         updateNodePosition(state.current, node);
                         updateLinkPosition(node);
-                        solveKinematics(state.current, node);
+                        const root = solveInverseKinematics(state.current, node);
+                        solveKinematics(state.current, root);
                         for (const link of node.children)
                             updateLink(link);
                         if (node.parent)
@@ -2014,7 +2093,8 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                                 updateHandle(state.current, node, node.handles[i]);
                                 node.handles = getHandles(state.current, node);
                                 updateLinkPosition(node);
-                                solveKinematics(state.current, node);
+                                const root = solveInverseKinematics(state.current, node);
+                                solveKinematics(state.current, root);
                                 for (const link of node.children)
                                     updateLink(link);
                                 if (node.parent)
