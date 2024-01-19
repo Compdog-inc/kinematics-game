@@ -574,6 +574,7 @@ export const updateLink = (link: GameWidgetLink) => {
     link.length = Math.sqrt(dx * dx + dy * dy);
 }
 
+let kinematicsDepthLinks: GameWidgetLink[] = [];
 const solveKinematics = (state: HTMLGameWidget, node: GameWidgetNode) => {
     switch (node.id) {
         case 1: // rotating node
@@ -669,6 +670,10 @@ const solveKinematics = (state: HTMLGameWidget, node: GameWidgetNode) => {
     updateNodePosition(state, node);
     updateLinkPosition(node);
     for (const link of node.children) {
+        if (kinematicsDepthLinks.includes(link))
+            continue;
+        else
+            kinematicsDepthLinks.push(link);
         if (link.child && link.parent) {
             calculateClosestNode(state, link.child);
             updateNodePosition(state, link.child);
@@ -689,7 +694,12 @@ const solveKinematics = (state: HTMLGameWidget, node: GameWidgetNode) => {
     }
 };
 
+let inverseKinematicsDepthLinks: GameWidgetLink[] = [];
 const solveInverseKinematics = (state: HTMLGameWidget, node: GameWidgetNode): GameWidgetNode => {
+    if (node.parent && inverseKinematicsDepthLinks.includes(node.parent))
+        return node;
+    if (node.parent)
+        inverseKinematicsDepthLinks.push(node.parent);
     switch (node.id) {
         default:
             {
@@ -715,6 +725,7 @@ const solveInverseKinematics = (state: HTMLGameWidget, node: GameWidgetNode): Ga
     }
 
     if (node.parent && node.parent.parent) {
+        kinematicsDepthLinks = [];
         solveKinematics(state, node.parent.parent);
         return solveInverseKinematics(state, node.parent.parent);
     } else {
@@ -2068,7 +2079,9 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                         calculateClosestNode(state.current, node);
                         updateNodePosition(state.current, node);
                         updateLinkPosition(node);
+                        inverseKinematicsDepthLinks = [];
                         const root = solveInverseKinematics(state.current, node);
+                        kinematicsDepthLinks = [];
                         solveKinematics(state.current, root);
                         for (const link of node.children)
                             updateLink(link);
@@ -2093,7 +2106,9 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
                                 updateHandle(state.current, node, node.handles[i]);
                                 node.handles = getHandles(state.current, node);
                                 updateLinkPosition(node);
+                                inverseKinematicsDepthLinks = [];
                                 const root = solveInverseKinematics(state.current, node);
+                                kinematicsDepthLinks = [];
                                 solveKinematics(state.current, root);
                                 for (const link of node.children)
                                     updateLink(link);
