@@ -11,7 +11,7 @@ export const getNodeSize = (node: GameWidgetNode): number => {
         case 1: // rotating node
             return headerSize + 8; // [angle:8]
         case 2: // translating node
-            return headerSize + 16; // [angle:8][delta:8]
+            return headerSize + 32; // [angle:8][delta:8][cx:8][cy:8]
         case 3: // clamped node
             return headerSize + 24; // [angle:8][minAngle:8][maxAngle:8]
         case 4: // clamped translating node
@@ -76,6 +76,8 @@ export const fromSimulation = (data: HTMLGameWidget): Buffer => {
                 /// ========== BEGIN NODE BODY ============
                 offset = buffer.writeDoubleLE((node as GameWidgetTranslatingNode).angle, offset);
                 offset = buffer.writeDoubleLE((node as GameWidgetTranslatingNode).delta, offset);
+                offset = buffer.writeDoubleLE((node as GameWidgetTranslatingNode).cx, offset);
+                offset = buffer.writeDoubleLE((node as GameWidgetTranslatingNode).cy, offset);
                 /// =========== END NODE BODY =============
                 break;
             case 3: // clamped node
@@ -186,6 +188,8 @@ export const toSimulation = (buffer: Buffer, data: HTMLGameWidget) => {
                 /// ========== BEGIN NODE BODY ============
                 (node as GameWidgetTranslatingNode).angle = buffer.readDoubleLE(offset); offset += 8;
                 (node as GameWidgetTranslatingNode).delta = buffer.readDoubleLE(offset); offset += 8;
+                (node as GameWidgetTranslatingNode).cx = buffer.readDoubleLE(offset); offset += 8;
+                (node as GameWidgetTranslatingNode).cy = buffer.readDoubleLE(offset); offset += 8;
                 /// =========== END NODE BODY =============
                 break;
             case 3: // clamped node
