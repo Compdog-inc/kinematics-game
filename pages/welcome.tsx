@@ -37,6 +37,10 @@ export default function Welcome() {
                     borderRadius: {
                         xs: '0',
                         md: 'lg'
+                    },
+                    borderWidth: {
+                        xs: 0,
+                        md: '1px'
                     }
                 }}>
                     <Typography level="h2">
