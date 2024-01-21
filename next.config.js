@@ -12,6 +12,14 @@ const nextConfig = {
         '@mui/icons-material/?(((\\w*)?/?)*)': {
             transform: '@mui/icons-material/{{ matches.[1] }}/{{member}}'
         }
+    },
+    async rewrites() {
+        return [
+            {
+                source: '/lesson/:id',
+                destination: '/lesson',
+            },
+        ]
     }
 };
 
