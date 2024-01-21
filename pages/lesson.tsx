@@ -41,7 +41,7 @@ export default function Lesson() {
     }, []);
 
     useEffect(() => {
-        if (lessonId.current) {
+        if (lessonId.current && page > -1) {
             (async () => {
                 const resp = await fetch("/api/lesson/" + lessonId.current + "/page/" + page);
                 if (resp.ok) {
