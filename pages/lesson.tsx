@@ -13,6 +13,7 @@ import humanizeDuration from "humanize-duration";
 import Button from "@mui/joy/Button";
 import Gamewidget from "../components/gamewidget";
 import { useRouter } from "next/router";
+import Cookies from "js-cookie";
 
 export default function Lesson() {
     const [lesson, setLesson] = React.useState(null as Lesson | null);
@@ -30,8 +31,19 @@ export default function Lesson() {
         if (indexOfLesson >= 0 && path.length > indexOfLesson + 1) {
             const id = path[indexOfLesson + 1];
             lessonId.current = id;
+            const cookieRaw = Cookies.get("viewed_lessons")?.toLocaleUpperCase() || "";
+            const viewedLessons = cookieRaw.trim().length == 0 ? [] : cookieRaw.split('|');
+            const newLesson = !viewedLessons.includes(id.toLocaleUpperCase());
+            if (newLesson) {
+                viewedLessons.push(id.toLocaleUpperCase());
+            }
+            Cookies.set("viewed_lessons", viewedLessons.join('|'), {
+                expires: 400,
+                sameSite: 'strict'
+            });
+
             (async () => {
-                const resp = await fetch("/api/lesson/" + id);
+                const resp = await fetch("/api/lesson/" + id + (newLesson ? "?incrview" : ""));
                 if (resp.ok) {
                     const json = await resp.json();
                     setLesson(json);

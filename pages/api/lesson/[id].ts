@@ -3,15 +3,24 @@ import { Lesson } from "../../../utils/lesson";
 import { LessonSave, lessonMap } from "../../../utils/lesson_saves";
 import { kv } from "@vercel/kv";
 
+const toInt = (s: unknown) => {
+    if (typeof (s) === 'number')
+        return s;
+    else
+        return Number(s);
+};
+
 export default async (req: NextApiRequest, res: NextApiResponse) => {
     const id = req.query.id;
+    const incrView = typeof (req.query.incrview) !== 'undefined';
     if (typeof (id) === 'string') {
         if (!lessonMap.has(id))
             return res.status(404).end();
 
         const save = lessonMap.get(id) as LessonSave;
 
-        const viewCount = await kv.incr('lesson-views-' + id);
+        const key = 'lesson-views-' + id;
+        const viewCount = incrView ? (await kv.incr(key)) : toInt(await kv.get(key));
 
         const lesson: Lesson = {
             name: save.name,
