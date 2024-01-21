@@ -1,16 +1,26 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { Lesson } from "../../../utils/lesson";
+import { LessonSave, lessonMap } from "../../../utils/lesson_saves";
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
     const id = req.query.id;
-    const lesson: Lesson = {
-        name: "Tristique magna sit amet purus gravida quis blandit #" + id,
-        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Eget felis eget nunc lobortis.",
-        pages: 1,
-        cover: "/images/lesson/1/cover.webp",
-        coverBlur: "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=",
-        time: 60000,
-        views: 15
-    };
-    res.status(200).json(lesson);
+    if (typeof (id) === 'string') {
+        if (!lessonMap.has(id))
+            res.status(404).end();
+
+        const save = lessonMap.get(id) as LessonSave;
+
+        const lesson: Lesson = {
+            name: save.name,
+            description: save.description,
+            pages: save.pages.length,
+            cover: save.cover,
+            coverBlur: save.coverBlur,
+            time: save.time,
+            views: 15
+        };
+        res.status(200).json(lesson);
+    } else {
+        res.status(400).end();
+    }
 };

@@ -35,10 +35,12 @@ export default function Lesson() {
                 if (resp.ok) {
                     const json = await resp.json();
                     setLesson(json);
+                } else {
+                    router.replace("/learn");
                 }
             })();
         }
-    }, []);
+    }, [router]);
 
     useEffect(() => {
         if (lessonId.current && page > -1) {
@@ -189,7 +191,7 @@ export default function Lesson() {
                                 if (lesson != null && page < lesson.pages - 1) {
                                     setPage(page + 1);
                                     setJsPage(null);
-                                } else {
+                                } else if (lesson != null) {
                                     router.push("/learn");
                                 }
                             }}>

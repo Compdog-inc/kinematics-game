@@ -1,0 +1,14 @@
+{
+    "name": "How to use the puzzles page",
+    "description": "This tutorial will help you learn how the puzzles work and where to input your answers.",
+    "cover": "/images/lesson/1/cover.webp",
+    "coverBlur": "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=",
+    "time": 60000,
+    "pages": [
+        {
+            "textBefore": "Puzzles not created yet",
+            "imageType": "image",
+            "imageSrc": "/images/lesson/1/img0.webp"
+        }
+    ]
+}
