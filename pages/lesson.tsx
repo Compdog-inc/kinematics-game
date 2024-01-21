@@ -154,7 +154,7 @@ export default function Lesson() {
                                     <Skeleton loading={lesson == null}>
                                         {lesson == null ? "69" : lesson.views}
                                     </Skeleton>
-                                </Typography>&nbsp;views
+                                </Typography>&nbsp;{lesson?.views === 1 ? 'view' : 'views'}
                             </Typography>
                         </> : <>
                             <Typography level="body-lg" mb={1}>
