@@ -33,8 +33,8 @@ export default function Navbar() {
                     <nav className={styles.nav}>
                         <ul role="menubar">
                             <li>
-                                <NextLink href="/tutorial/" passHref legacyBehavior><Link variant="plain" underline="none" color="neutral" aria-label="Go to tutorial" >
-                                    Tutorial
+                                <NextLink href="/learn/" passHref legacyBehavior><Link variant="plain" underline="none" color="neutral" aria-label="Go to lessons" >
+                                    Learn
                                 </Link></NextLink>
                             </li>
                             <li>
@@ -106,10 +106,10 @@ export default function Navbar() {
                                         role="menuitem"
                                         component="a"
                                         aria-label="Go to homepage" sx={{ fontWeight: 'lg' }} onClick={clicked}>Home</ListItemButton></NextLink>
-                                    <NextLink href="/tutorial/" passHref legacyBehavior><ListItemButton
+                                    <NextLink href="/learn/" passHref legacyBehavior><ListItemButton
                                         role="menuitem"
                                         component="a"
-                                        aria-label="Go to tutorial" sx={{ fontWeight: 'lg' }} onClick={clicked}>Tutorial</ListItemButton></NextLink>
+                                        aria-label="Go to lessons" sx={{ fontWeight: 'lg' }} onClick={clicked}>Learn</ListItemButton></NextLink>
                                     <NextLink href="/puzzles/" passHref legacyBehavior><ListItemButton
                                         role="menuitem"
                                         component="a"

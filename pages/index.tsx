@@ -74,7 +74,7 @@ export default function Index() {
                                     maxWidth: '500px'
                                 }}>
                                     Pixel Perfect Kinematics offers an interactive and fun way to learn about kinematics through solving puzzles.
-                                    Start with an introductory tutorial, complete our engaging levels, or play around with the sandbox.
+                                    Start with an introductory lesson, complete our engaging levels, or play around with the sandbox.
                                 </Typography>
                                 <Box sx={{
                                     display: 'flex',
