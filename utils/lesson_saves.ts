@@ -17,5 +17,5 @@ export interface LessonSavePage {
 }
 
 export const lessonMap = new Map<string, LessonSave>([
-    ["1", puzzles_tutorial]
+    ["1", puzzles_tutorial as LessonSave]
 ]);
