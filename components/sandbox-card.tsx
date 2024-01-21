@@ -82,7 +82,8 @@ export default function SandboxCard(props: {
             let timeout: NodeJS.Timeout;
 
             const scrolls = Array.from(document.querySelectorAll("div")).filter(m => {
-                const v = m.computedStyleMap().get("overflow-y");
+                const st = window.getComputedStyle(m);
+                const v = st.overflowY;
                 if (typeof (v) !== 'undefined')
                     return v.toString() === "auto";
                 return false;
