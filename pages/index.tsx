@@ -64,7 +64,7 @@ export default function Index() {
                                 }}>
                                     <Typography component="span" sx={{
                                         backgroundImage: theme => `linear-gradient(90deg, ${theme.palette.primary[400]} 5%, ${theme.palette.primary[500]} 90%)`,
-                                        WebkitBackgroundClip: "text",
+                                        backgroundClip: "text",
                                         WebkitTextFillColor: "transparent"
                                     }}>Learn more</Typography>
                                     <br />
