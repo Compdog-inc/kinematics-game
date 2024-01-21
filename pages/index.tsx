@@ -11,6 +11,7 @@ import Stack from "@mui/joy/Stack";
 import Image from "next/image";
 import placeholderImg from "../images/placeholder_600x1200.webp";
 import AspectRatio from "@mui/joy/AspectRatio";
+import NextLink from "next/link";
 
 export default function Index() {
     const { mode } = useColorScheme();
@@ -84,7 +85,7 @@ export default function Index() {
                                     }
                                 }}>
                                     {mounted ?
-                                        <Button component="a" href="/welcome/" target="_self" rel="noopener" size="lg" variant="solid" tabIndex={0}
+                                        <NextLink href="/welcome/" passHref legacyBehavior><Button component="a" target="_self" rel="noopener" size="lg" variant="solid" tabIndex={0}
                                             sx={{
                                                 marginRight: {
                                                     xs: 0,
@@ -122,8 +123,8 @@ export default function Index() {
                                             }}
                                             endDecorator={<KeyboardArrowRightRounded />}>
                                             Expand your knowledge
-                                        </Button> :
-                                        <Button component="a" href="/welcome/" target="_self" rel="noopener" size="lg" variant="solid" tabIndex={0}
+                                        </Button></NextLink> :
+                                        <NextLink href="/welcome/" passHref legacyBehavior><Button component="a" target="_self" rel="noopener" size="lg" variant="solid" tabIndex={0}
                                             sx={{
                                                 marginRight: {
                                                     xs: 0,
@@ -157,7 +158,7 @@ export default function Index() {
                                             }}
                                             endDecorator={<KeyboardArrowRightRounded />}>
                                             Expand your knowledge
-                                        </Button>
+                                        </Button></NextLink>
                                     }
                                 </Box>
                             </Box>
