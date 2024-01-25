@@ -1,0 +1,21 @@
+{
+    "name": "Trigonometry - Right triangle vertex from an angle and hypotenuse",
+    "description": "This tutorial will help you learn how to get the coordinates of the vertex of a triangle with a non-unit hypotenuse from its angle.",
+    "cover": "/images/lesson/1/cover.webp",
+    "coverBlur": "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=",
+    "time": 120000,
+    "pages": [
+        {
+            "textBefore": "This is a right triangle",
+            "imageType": "svg",
+            "imageSrc": "/images/lesson/8/right_triangle.svg",
+            "textAfter": "If the coordinates of a unit length triangle are (cosΘ, sinΘ), then changing the hypotenuse would move the vertex further away. This means that the coordinates of the vertex are (r*cosΘ, r*sinΘ)."
+        },
+        {
+            "textBefore": "In this example, the angle is 30° and the position of the parent node is at the origin (0, 0). And the link length is 2.",
+            "imageType": "widget",
+            "imageSrc": "_x-LCAAAAAAAAApjYgCDB_vPngEBBgcYDRNnZWBgYATh1T4RL6q2_bb_Dwbv7RkZUMF_mdnv284HMR74k_cjcG72h_2EJbzORGksSGY8cOHD4l0u-2_CJZgYsABGKMYA6_ZbSLrU2WOTAgF0d8M8BADiS2rA-gAAAA%3D%3D",
+            "textAfter": "To get the position of the child node, add the position of the parent node to (2*cos(30°), 2*sin(30°)). The position of the child node is (√3, 1)"
+        }
+    ]
+}

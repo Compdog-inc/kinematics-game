@@ -1,168 +1,58 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
-<svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
+<svg xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="114.7154mm"
-   height="71.352257mm"
-   viewBox="0 0 114.7154 71.35226"
-   version="1.1"
-   id="svg2504"
-   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
-   sodipodi:docname="20190820..trig_right_triangle_rxy.svg">
-  <title
-     id="title3143">Right triangle with variables x, y, r, and θ</title>
-  <defs
-     id="defs2498" />
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="0.98994949"
-     inkscape:cx="61.494106"
-     inkscape:cy="169.38942"
-     inkscape:document-units="mm"
-     inkscape:current-layer="layer1"
-     showgrid="false"
-     units="mm"
-     inkscape:window-width="1920"
-     inkscape:window-height="1016"
-     inkscape:window-x="0"
-     inkscape:window-y="27"
-     inkscape:window-maximized="1"
-     fit-margin-top="2"
-     fit-margin-left="2"
-     fit-margin-right="2"
-     fit-margin-bottom="2" />
-  <metadata
-     id="metadata2501">
-    <rdf:RDF>
-      <cc:Work
-         rdf:about="">
-        <dc:format>image/svg+xml</dc:format>
-        <dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title>Right triangle with variables x, y, r, and θ</dc:title>
-        <cc:license
-           rdf:resource="http://creativecommons.org/licenses/by-sa/4.0/" />
-        <dc:creator>
-          <cc:Agent>
-            <dc:title>Steven Baltakatei Sandoval</dc:title>
-          </cc:Agent>
-        </dc:creator>
-        <dc:description>A right triangle for illustrating trigonometric relations between variables x, y, r, and θ.</dc:description>
-        <dc:date>2019-08-20T06:01Z</dc:date>
-      </cc:Work>
-      <cc:License
-         rdf:about="http://creativecommons.org/licenses/by-sa/4.0/">
-        <cc:permits
-           rdf:resource="http://creativecommons.org/ns#Reproduction" />
-        <cc:permits
-           rdf:resource="http://creativecommons.org/ns#Distribution" />
-        <cc:requires
-           rdf:resource="http://creativecommons.org/ns#Notice" />
-        <cc:requires
-           rdf:resource="http://creativecommons.org/ns#Attribution" />
-        <cc:permits
-           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
-        <cc:requires
-           rdf:resource="http://creativecommons.org/ns#ShareAlike" />
-      </cc:License>
-    </rdf:RDF>
-  </metadata>
-  <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
-     id="layer1"
-     transform="translate(-9.2390442,-222.55641)">
-    <g
-       id="g3250"
-       transform="matrix(1.2645479,0,0,1.2645479,-2.9732651,-77.223816)">
-      <path
-         inkscape:connector-curvature="0"
-         id="path2508"
-         d="m 12.189732,283.01486 h 77.7686 v -43.93973 z"
-         style="fill:none;stroke:#000000;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
-      <path
-         d="m 89.958335,283.01485 -6.638838,0 0,-6.63883 6.638838,0 z"
-         inkscape:randomized="0"
-         inkscape:rounded="0"
-         inkscape:flatsided="true"
-         sodipodi:arg2="1.5707963"
-         sodipodi:arg1="0.78539816"
-         sodipodi:r2="3.3194184"
-         sodipodi:r1="4.6943669"
-         sodipodi:cy="279.69543"
-         sodipodi:cx="86.638916"
-         sodipodi:sides="4"
-         id="path2510"
-         style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-         sodipodi:type="star" />
-      <path
-         d="m 25.388514,275.58044 c 1.278062,2.26902 1.954875,4.86011 1.949736,7.46432"
-         sodipodi:t0="0.98766673"
-         sodipodi:argument="-41.750473"
-         sodipodi:radius="15.148548"
-         sodipodi:revolution="6.6451082"
-         sodipodi:expansion="0"
-         sodipodi:cy="283.01486"
-         sodipodi:cx="12.189732"
-         id="path2520"
-         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none"
-         sodipodi:type="spiral" />
-      <text
-         id="text3070"
-         y="291.80283"
-         x="51.782734"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:1.25;font-family:'Liberation Serif';-inkscape-font-specification:'Liberation Serif';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-         xml:space="preserve"><tspan
-           style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Linux Libertine O';-inkscape-font-specification:'Linux Libertine O Italic';stroke-width:0.26458332"
-           y="291.80283"
-           x="51.782734"
-           id="tspan3068"
-           sodipodi:role="line">x</tspan></text>
-      <text
-         id="text3074"
-         y="257.50146"
-         x="46.585567"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:1.25;font-family:'Liberation Serif';-inkscape-font-specification:'Liberation Serif';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-         xml:space="preserve"><tspan
-           style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Linux Libertine O';-inkscape-font-specification:'Linux Libertine O Italic';stroke-width:0.26458332"
-           y="257.50146"
-           x="46.585567"
-           id="tspan3072"
-           sodipodi:role="line">r</tspan></text>
-      <text
-         id="text3078"
-         y="263.36011"
-         x="92.98214"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:1.25;font-family:'Liberation Serif';-inkscape-font-specification:'Liberation Serif';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-         xml:space="preserve"><tspan
-           style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Linux Libertine O';-inkscape-font-specification:'Linux Libertine O';stroke-width:0.26458332"
-           y="263.36011"
-           x="92.98214"
-           id="tspan3076"
-           sodipodi:role="line">y</tspan></text>
-      <text
-         id="text3082"
-         y="280.74701"
-         x="31.844494"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:1.25;font-family:'Liberation Serif';-inkscape-font-specification:'Liberation Serif';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-         xml:space="preserve"><tspan
-           style="font-style:italic;stroke-width:0.26458332"
-           y="280.74701"
-           x="31.844494"
-           id="tspan3080"
-           sodipodi:role="line">θ</tspan></text>
-    </g>
-  </g>
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="114.7154mm" height="114.7154mm" viewBox="0 0 114.7154 114.7154" version="1.1" id="svg2504" inkscape:version="0.92.4 (5da689c313, 2019-01-14)" sodipodi:docname="20190820..trig_right_triangle_rxy.svg">
+   <title id="title3143">Right triangle with variables x, y, r, and θ</title>
+   <defs id="defs2498" />
+   <sodipodi:namedview id="base" pagecolor="#ffffff" bordercolor="#666666" borderopacity="1.0" inkscape:pageopacity="0.0" inkscape:pageshadow="2" inkscape:zoom="0.98994949" inkscape:cx="61.494106" inkscape:cy="169.38942" inkscape:document-units="mm" inkscape:current-layer="layer1" showgrid="false" units="mm" inkscape:window-width="1920" inkscape:window-height="1016" inkscape:window-x="0" inkscape:window-y="27" inkscape:window-maximized="1" fit-margin-top="2" fit-margin-left="2" fit-margin-right="2" fit-margin-bottom="2" />
+   <metadata id="metadata2501">
+      <rdf:RDF>
+         <cc:Work rdf:about="">
+            <dc:format>image/svg+xml</dc:format>
+            <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+            <dc:title>Right triangle with variables x, y, r, and θ</dc:title>
+            <cc:license rdf:resource="http://creativecommons.org/licenses/by-sa/4.0/" />
+            <dc:creator>
+               <cc:Agent>
+                  <dc:title>Steven Baltakatei Sandoval</dc:title>
+               </cc:Agent>
+            </dc:creator>
+            <dc:description>A right triangle for illustrating trigonometric relations between variables x, y, r, and θ.</dc:description>
+            <dc:date>2019-08-20T06:01Z</dc:date>
+         </cc:Work>
+         <cc:License rdf:about="http://creativecommons.org/licenses/by-sa/4.0/">
+            <cc:permits rdf:resource="http://creativecommons.org/ns#Reproduction" />
+            <cc:permits rdf:resource="http://creativecommons.org/ns#Distribution" />
+            <cc:requires rdf:resource="http://creativecommons.org/ns#Notice" />
+            <cc:requires rdf:resource="http://creativecommons.org/ns#Attribution" />
+            <cc:permits rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+            <cc:requires rdf:resource="http://creativecommons.org/ns#ShareAlike" />
+         </cc:License>
+      </rdf:RDF>
+   </metadata>
+   <g inkscape:label="Layer 1" inkscape:groupmode="layer" id="layer1" transform="translate(-9.2390442,-222.55641)">
+      <g id="g3250" transform="matrix(1.2645479,0,0,1.2645479,-2.9732651,-77.223816)">
+         <path inkscape:connector-curvature="0" id="path2508" d="m 12.189732,283.01486 h 77.7686 v -43.93973 z" style="fill:none;stroke:#000000;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         <path d="m 89.958335,283.01485 -6.638838,0 0,-6.63883 6.638838,0 z" inkscape:randomized="0" inkscape:rounded="0" inkscape:flatsided="true" sodipodi:arg2="1.5707963" sodipodi:arg1="0.78539816" sodipodi:r2="3.3194184" sodipodi:r1="4.6943669" sodipodi:cy="279.69543" sodipodi:cx="86.638916" sodipodi:sides="4" id="path2510" style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" sodipodi:type="star" />
+         <path d="m 25.388514,275.58044 c 1.278062,2.26902 1.954875,4.86011 1.949736,7.46432" sodipodi:t0="0.98766673" sodipodi:argument="-41.750473" sodipodi:radius="15.148548" sodipodi:revolution="6.6451082" sodipodi:expansion="0" sodipodi:cy="283.01486" sodipodi:cx="12.189732" id="path2520" style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none" sodipodi:type="spiral" />
+         <text id="text3070" y="291.80283" x="51.782734" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:1.25;font-family:'Liberation Serif';-inkscape-font-specification:'Liberation Serif';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332" xml:space="preserve">
+            <tspan style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Linux Libertine O';-inkscape-font-specification:'Linux Libertine O Italic';stroke-width:0.26458332" y="291.80283" x="51.782734" id="tspan3068" sodipodi:role="line">x</tspan>
+         </text>
+         <text id="text3074" y="257.50146" x="46.585567" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:1.25;font-family:'Liberation Serif';-inkscape-font-specification:'Liberation Serif';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332" xml:space="preserve">
+            <tspan style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Linux Libertine O';-inkscape-font-specification:'Linux Libertine O Italic';stroke-width:0.26458332" y="257.50146" x="46.585567" id="tspan3072" sodipodi:role="line">r</tspan>
+         </text>
+         <text id="text3078" y="263.36011" x="92.98214" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:1.25;font-family:'Liberation Serif';-inkscape-font-specification:'Liberation Serif';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332" xml:space="preserve">
+            <tspan style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Linux Libertine O';-inkscape-font-specification:'Linux Libertine O';stroke-width:0.26458332" y="263.36011" x="92.98214" id="tspan3076" sodipodi:role="line">y</tspan>
+         </text>
+         <text id="text3082" y="280.74701" x="31.844494" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:1.25;font-family:'Liberation Serif';-inkscape-font-specification:'Liberation Serif';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332" xml:space="preserve">
+            <tspan style="font-style:italic;stroke-width:0.26458332" y="280.74701" x="31.844494" id="tspan3080" sodipodi:role="line">θ</tspan>
+         </text>
+      </g>
+   </g>
 </svg>

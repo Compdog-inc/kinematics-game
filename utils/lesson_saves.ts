@@ -5,6 +5,7 @@ import interactive_kinematics from "../lessons/interactive_kinematics.json";
 import sharing from "../lessons/sharing.json";
 import sincos from "../lessons/sincos.json";
 import vertex from "../lessons/vertex.json";
+import hypo from "../lessons/hypo.json";
 
 export interface LessonSave {
     name: string;
@@ -29,5 +30,6 @@ export const lessonMap = new Map<string, LessonSave>([
     ["4", interactive_kinematics as LessonSave],
     ["5", sharing as LessonSave],
     ["7", sincos as LessonSave],
-    ["8", vertex as LessonSave]
+    ["8", vertex as LessonSave],
+    ["9", hypo as LessonSave]
 ]);
