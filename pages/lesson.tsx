@@ -11,9 +11,11 @@ import CardOverflow from "@mui/joy/CardOverflow";
 import CardContent from "@mui/joy/CardContent";
 import humanizeDuration from "humanize-duration";
 import Button from "@mui/joy/Button";
-import Gamewidget from "../components/gamewidget";
+import Gamewidget, { HTMLGameWidget } from "../components/gamewidget";
 import { useRouter } from "next/router";
 import Cookies from "js-cookie";
+import styles from '../styles/lesson.module.css';
+import { toSimulationUrl } from "../utils/serializer";
 
 export default function Lesson() {
     const [lesson, setLesson] = React.useState(null as Lesson | null);
@@ -23,6 +25,8 @@ export default function Lesson() {
 
     const lessonId = React.useRef(null as string | null);
     const pageCache = React.useRef(new Map<number, LessonPage>());
+
+    const widget = React.useRef(null as HTMLGameWidget | null);
 
     useEffect(() => {
         const url = new URL(location.href);
@@ -66,6 +70,16 @@ export default function Lesson() {
             })();
         }
     }, [page]);
+
+    useEffect(() => {
+        if (widget.current && jsPage && jsPage.imageType === LessonImageType.Widget) {
+            const encoded = decodeURIComponent(jsPage.imageSrc);
+            toSimulationUrl(encoded, widget.current).then(() => {
+                if (widget.current && widget.current.render)
+                    requestAnimationFrame(widget.current.render);
+            });
+        }
+    }, [jsPage]);
 
     let cachedPage = jsPage;
     if (pageCache.current.has(page)) {
@@ -171,7 +185,9 @@ export default function Lesson() {
                                         <Image alt="" src={cachedPage.imageSrc} placeholder="empty" fill /> :
                                         (cachedPage != null && cachedPage.imageType === LessonImageType.Svg) ?
                                             <Image alt="" src={cachedPage.imageSrc} placeholder="empty" fill /> :
-                                            <Gamewidget />
+                                            (cachedPage != null && cachedPage?.imageType === LessonImageType.Widget) ?
+                                                <Gamewidget className={styles.widget} stref={(o) => widget.current = o} /> :
+                                                null
                                     }
                                 </Skeleton>
                             </AspectRatio>

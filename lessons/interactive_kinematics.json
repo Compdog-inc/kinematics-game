@@ -1,0 +1,19 @@
+{
+    "name": "How to use the sandbox - Interactive kinematics",
+    "description": "This tutorial will show how to use the kinematics and inverse kinematics features of the sandbox.",
+    "cover": "/images/lesson/1/cover.webp",
+    "coverBlur": "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=",
+    "time": 60000,
+    "pages": [
+        {
+            "textBefore": "Moving the bottom node (clamped translating node) will move the rotating node along with it, keeping the link length using kinematics.",
+            "imageType": "widget",
+            "imageSrc": "_x-LCAAAAAAAAApjYoCAA1DaAY0-wMrAwMDIwMDAwpDhtX6_ReV-Bj3D7IUXGvYzQCVAGCwl-WE_RM8He4PshQ19Z9_bQ_lQ8Qf2jDAFMBoqAAf_ZWa_bzsfxHjgT96PwLnZMJ34JLzORGksSGY8cOHD4l0u-2_CJbC5F91qJiATAKX30hoCAQAA"
+        },
+        {
+            "textBefore": "Moving the top node (rotating node) will make the clamped translating node follow it, keeping the link length using inverse kinematics.",
+            "imageType": "widget",
+            "imageSrc": "_x-LCAAAAAAAAApjYoCAA1DaAY0-wMrAwMDIwMDAwpDhtX6_ReV-Bj3D7IUXGvYzQCVAGCwl-WE_RM8He4PshQ19Z9_bQ_lQ8Qf2jDAFMBoqAAf_ZWa_bzsfxHjgT96PwLnZMJ34JLzORGksSGY8cOHD4l0u-2_CJbC5F91qJiATAKX30hoCAQAA"
+        }
+    ]
+}

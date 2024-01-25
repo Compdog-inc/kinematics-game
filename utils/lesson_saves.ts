@@ -1,6 +1,7 @@
 import puzzles_tutorial from "../lessons/puzzles_tutorial.json";
 import adding_removing_nodes from "../lessons/adding_removing_nodes.json";
 import linking_nodes from "../lessons/linking_nodes.json";
+import interactive_kinematics from "../lessons/interactive_kinematics.json";
 
 export interface LessonSave {
     name: string;
@@ -21,5 +22,6 @@ export interface LessonSavePage {
 export const lessonMap = new Map<string, LessonSave>([
     ["1", puzzles_tutorial as LessonSave],
     ["2", adding_removing_nodes as LessonSave],
-    ["3", linking_nodes as LessonSave]
+    ["3", linking_nodes as LessonSave],
+    ["4", interactive_kinematics as LessonSave]
 ]);
