@@ -3,3 +3,7 @@
     height: 200px;
     background-color: var(--joy-palette-background-body);
 }
+
+.svgImg {
+    background-color: #fff;
+}

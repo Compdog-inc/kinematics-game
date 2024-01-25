@@ -184,7 +184,7 @@ export default function Lesson() {
                                     {(cachedPage != null && cachedPage.imageType === LessonImageType.Image) ?
                                         <Image alt="" src={cachedPage.imageSrc} placeholder="empty" fill /> :
                                         (cachedPage != null && cachedPage.imageType === LessonImageType.Svg) ?
-                                            <Image alt="" src={cachedPage.imageSrc} placeholder="empty" fill /> :
+                                            <Image alt="" src={cachedPage.imageSrc} placeholder="empty" fill className={styles.svgImg} /> :
                                             (cachedPage != null && cachedPage?.imageType === LessonImageType.Widget) ?
                                                 <Gamewidget className={styles.widget} stref={(o) => widget.current = o} /> :
                                                 null

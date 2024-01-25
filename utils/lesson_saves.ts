@@ -3,6 +3,7 @@ import adding_removing_nodes from "../lessons/adding_removing_nodes.json";
 import linking_nodes from "../lessons/linking_nodes.json";
 import interactive_kinematics from "../lessons/interactive_kinematics.json";
 import sharing from "../lessons/sharing.json";
+import sincos from "../lessons/sincos.json";
 
 export interface LessonSave {
     name: string;
@@ -25,5 +26,6 @@ export const lessonMap = new Map<string, LessonSave>([
     ["2", adding_removing_nodes as LessonSave],
     ["3", linking_nodes as LessonSave],
     ["4", interactive_kinematics as LessonSave],
-    ["5", sharing as LessonSave]
+    ["5", sharing as LessonSave],
+    ["7", sincos as LessonSave]
 ]);
