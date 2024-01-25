@@ -75,7 +75,7 @@ export default function Lesson() {
     return (
         <>
             <Head>
-                <title>Pixel Perfect Kinematics | Lesson</title>
+                <title>{"Pixel Perfect Kinematics | " + ((lesson && lesson != null) ? lesson.name : 'Lesson')}</title>
             </Head>
             <Box display="flex" justifyContent="center" height="calc(100vh - 60px)" sx={{
                 pt: {
