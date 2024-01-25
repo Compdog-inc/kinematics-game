@@ -3,7 +3,7 @@
     "description": "This tutorial will show how to add and remove nodes using the drag+drop and add-on-click features on both desktop and mobile versions.",
     "cover": "/images/lesson/1/cover.webp",
     "coverBlur": "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=",
-    "time": 60000,
+    "time": 240000,
     "pages": [
         {
             "textBefore": "To add nodes to the sandbox, first find the drawer on the left of the screen (or bottom if on mobile). If the drawer is hidden, press the open arrows button.",
