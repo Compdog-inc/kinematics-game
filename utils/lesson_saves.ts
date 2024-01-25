@@ -6,6 +6,7 @@ import sharing from "../lessons/sharing.json";
 import sincos from "../lessons/sincos.json";
 import vertex from "../lessons/vertex.json";
 import hypo from "../lessons/hypo.json";
+import stacking from "../lessons/stacking.json";
 
 export interface LessonSave {
     name: string;
@@ -31,5 +32,6 @@ export const lessonMap = new Map<string, LessonSave>([
     ["5", sharing as LessonSave],
     ["7", sincos as LessonSave],
     ["8", vertex as LessonSave],
-    ["9", hypo as LessonSave]
+    ["9", hypo as LessonSave],
+    ["10", stacking as LessonSave]
 ]);

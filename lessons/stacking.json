@@ -1,0 +1,15 @@
+{
+    "name": "Trigonometry - Stacking triangles",
+    "description": "This tutorial will help you learn how to get the coordinates of the vertex of a triangle with a non-unit hypotenuse from its angle.",
+    "cover": "/images/lesson/1/cover.webp",
+    "coverBlur": "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=",
+    "time": 60000,
+    "pages": [
+        {
+            "textBefore": "To get the position of a node whose parent is a child of another node, you need to create a second triangle at the vertex of the first one.",
+            "imageType": "svg",
+            "imageSrc": "/images/lesson/10/stacked.svg",
+            "textAfter": "If the node at (x1, y1) has the coordinates (r1*cosΘ1, r1*sinΘ1). The second child's position is (x1+x2, y1+y2) so it has the coordinates (r1*cosΘ1 + r2*cosΘ2, r1*sinΘ1 + r2*sinΘ2)"
+        }
+    ]
+}
