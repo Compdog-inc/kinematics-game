@@ -1,0 +1,39 @@
+{
+    "name": "How to use the sandbox - Adding and removing nodes",
+    "description": "This tutorial will show how to add and remove nodes using the drag+drop and add-on-click features on both desktop and mobile versions.",
+    "cover": "/images/lesson/1/cover.webp",
+    "coverBlur": "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=",
+    "time": 60000,
+    "pages": [
+        {
+            "textBefore": "To add nodes to the sandbox, first find the drawer on the left of the screen (or bottom if on mobile). If the drawer is hidden, press the open arrows button.",
+            "imageType": "image",
+            "imageSrc": "/images/lesson/2/drawer_desktop.webp",
+            "textAfter": "The circled button opens the drawer. On mobile there is a similar button near the bottom-right edge of the screen."
+        },
+        {
+            "textBefore": "Inside the drawer, there is a list of nodes. To add one to the sandbox, drag a node from the list into the viewport area. On mobile, press and wait until the node becomes highlighted (around a third of a second) and then drag it into the viewport.",
+            "imageType": "image",
+            "imageSrc": "/images/lesson/2/node_drag_blur.webp",
+            "textAfter": "This image shows a highlighted node after being held down. To add the node, drag it into the viewport area (shown by the arrow)."
+        },
+        {
+            "textBefore": "To add multiple instances of the same node quickly, enable add-on-click mode by clicking the '+' button next to the node. When add-on-click is enabled, clicking on the viewport area will create a node at that position unless there is already a node there. To switch to a different node, click the '+' button on a different node or click it again to disable add-on-click.",
+            "imageType": "image",
+            "imageSrc": "/images/lesson/2/addonclick.webp",
+            "textAfter": "The arrow points to the add-on-click button in its enabled state. The circled node is the cursor that shows where the node will be placed."
+        },
+        {
+            "textBefore": "To remove a node, select it in the viewport area and click the delete button in the top right corner. Optionally, it is possible to press the Delete key to remove the selected node.",
+            "imageType": "image",
+            "imageSrc": "/images/lesson/2/removenode.webp",
+            "textAfter": "In the image, the translating node is selected and the arrow points to the delete button."
+        },
+        {
+            "textBefore": "For nodes that contain editable points (e.g. the polygonal translating node), there is a separate button that toggles the point delete mode. When the point delete mode is enabled, clicking on the points within a node removes them. This mode persists across different nodes so don't forget to disable it.",
+            "imageType": "image",
+            "imageSrc": "/images/lesson/2/removepoint.webp",
+            "textAfter": "In the image, the arrow shows the toggle point delete mode button. A solid red means that the point delete mode is enabled. When the mode is enabled, clicking on a point (one is circled in the image) will remove it."
+        }
+    ]
+}

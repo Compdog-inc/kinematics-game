@@ -1,4 +1,5 @@
 import puzzles_tutorial from "../lessons/puzzles_tutorial.json";
+import adding_removing_nodes from "../lessons/adding_removing_nodes.json";
 
 export interface LessonSave {
     name: string;
@@ -17,5 +18,6 @@ export interface LessonSavePage {
 }
 
 export const lessonMap = new Map<string, LessonSave>([
-    ["1", puzzles_tutorial as LessonSave]
+    ["1", puzzles_tutorial as LessonSave],
+    ["2", adding_removing_nodes as LessonSave]
 ]);
