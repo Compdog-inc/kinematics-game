@@ -176,21 +176,22 @@ export default function Lesson() {
                                     {cachedPage == null ? "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Eget felis eget nunc lobortis." : cachedPage.textBefore}
                                 </Skeleton>
                             </Typography>
-                            <AspectRatio ratio="1" sx={{
-                                width: '200px',
-                                m: 3
-                            }}>
-                                <Skeleton loading={cachedPage == null}>
-                                    {(cachedPage != null && cachedPage.imageType === LessonImageType.Image) ?
-                                        <Image alt="" src={cachedPage.imageSrc} placeholder="empty" fill /> :
-                                        (cachedPage != null && cachedPage.imageType === LessonImageType.Svg) ?
-                                            <Image alt="" src={cachedPage.imageSrc} placeholder="empty" fill className={styles.svgImg} /> :
-                                            (cachedPage != null && cachedPage?.imageType === LessonImageType.Widget) ?
-                                                <Gamewidget className={styles.widget} stref={(o) => widget.current = o} /> :
-                                                null
-                                    }
-                                </Skeleton>
-                            </AspectRatio>
+                            {cachedPage == null || cachedPage.imageType !== LessonImageType.None ?
+                                <AspectRatio ratio="1" sx={{
+                                    width: '200px',
+                                    m: 3
+                                }}>
+                                    <Skeleton loading={cachedPage == null}>
+                                        {(cachedPage != null && cachedPage.imageType === LessonImageType.Image) ?
+                                            <Image alt="" src={cachedPage.imageSrc} placeholder="empty" fill /> :
+                                            (cachedPage != null && cachedPage.imageType === LessonImageType.Svg) ?
+                                                <Image alt="" src={cachedPage.imageSrc} placeholder="empty" fill className={styles.svgImg} /> :
+                                                (cachedPage != null && cachedPage?.imageType === LessonImageType.Widget) ?
+                                                    <Gamewidget className={styles.widget} stref={(o) => widget.current = o} /> :
+                                                    null
+                                        }
+                                    </Skeleton>
+                                </AspectRatio> : null}
                             {(cachedPage == null || cachedPage?.textAfter) ?
                                 <Typography level="body-lg" mb={1}>
                                     <Skeleton loading={cachedPage == null}>

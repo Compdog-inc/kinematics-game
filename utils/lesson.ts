@@ -16,6 +16,7 @@ export interface LessonPage {
 }
 
 export enum LessonImageType {
+    None,
     Image,
     Svg,
     Widget
