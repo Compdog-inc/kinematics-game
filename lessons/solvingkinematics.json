@@ -1,0 +1,27 @@
+{
+    "name": "Solving kinematics problems using trigonometry",
+    "description": "This tutorial will help you learn how to apply trigonometry to find the position of a child node.",
+    "cover": "/images/lesson/1/cover.webp",
+    "coverBlur": "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=",
+    "time": 300000,
+    "pages": [
+        {
+            "textBefore": "In this example, the first link has an angle of 30° from the horizontal and length 1. The second link makes an angle of 90° with the first link and has length 1.",
+            "imageType": "widget",
+            "imageSrc": "_x-LCAAAAAAAAApjMgaDy_vTwOCbPYT_2X7WTBDYuZ-VgYGBiYGBgZEBC2BEk2Bc7RPxomrba_v_YHDfHqaACVlX1MwNF77mXLcPVdMpsb391R4m-f9FXyxv9z6WA69c56yw0RVwgGn4H8frra90hf2AgLqWP_fdh_bY3AIC2KxnwiKOzQXMQAMAdcJc4g4BAAA%3D",
+            "textAfter": "First, find the coordinates of the first link using (r*cosΘ, r*sinΘ). Here, r is 1 so the position of the first link is (cos(30°), sin(30°)) or (√3/2, 1/2)."
+        },
+        {
+            "textBefore": "Since the angle in sin/cos has to be with the horizontal, it is necessary to convert the second link's angle. First, construct a right triangle with its hypotenuse being the second link.",
+            "imageType": "widget",
+            "imageSrc": "_x-LCAAAAAAAAApjMgaDy_vTwOCbPYT_2X7WTBDYuZ-VgYGBhYGBgZEBC2BEk2Bc7RPxomrba_v_YHDfHiTJBMXMyDqjZm648DXnun2omk6J7e2v9kxQk0BW_X_RF8vbvY_lwCvXOStsdAUcYJr-x_F66ytdYT8goK7lz333oT02N4EALmegi2NzBTMedTA-Ew5foKuDeRkAHxLQYGYBAAA%3D",
+            "textAfter": "Since the bottom side of the triangle is parallel to the horizontal, the angle of the first link is the same as the angle between the first link and the bottom of the triangle. The angle that the second link makes with the first link is the sum of the angle between the first link and the bottom of the triangle and the angle of the triangle. Therefore, the angle of the triangle is equal to the angle between the links minus the angle of the first link (90° - 30° = 60°)."
+        },
+        {
+            "textBefore": "",
+            "imageType": "widget",
+            "imageSrc": "_x-LCAAAAAAAAApjMgaDy_vTwOCbPYT_2X7WTBDYuZ-VgYEBhBkZsABGNAnG1T4RL6q2vbb_Dwb37UGSzAwMDExQmhVZd9TMDRe-5ly3D1XTKbG9_dWeCWoaCwMDw_8XfbG83ftYDrxynbPCRlfAAabpfxyvt77SFfYDAupa_tx3H9pjcxcIYHMKExZxbK5gxqMOxmfC4Qt0dcw43AMR_YFhHgAvaQbXkgEAAA%3D%3D",
+            "textAfter": "Because the angle in sin/cos begins on the +x axis, find the angle by subtracting the angle of the triangle from 180° (180° - 60° = 120°). Finally, get the coordiantes of the end point by adding the sin/cos values to the parent position. (√3/2 + cos(120°), 1/2 + sin(120°)) = (√3/2 - 1/2, 1/2 + √3/2) = ([√3-1]/2, [√3+1]/2)."
+        }
+    ]
+}
