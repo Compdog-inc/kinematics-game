@@ -113,13 +113,10 @@ export default function Learn() {
                                 }}
                             >
                                 <ListItem>
-                                    <NextLink href="/lesson/12" passHref legacyBehavior><ListItemButton component="a"><Typography textColor="text.tertiary">12</Typography>Solving kinematics with arbitrary angles</ListItemButton></NextLink>
+                                    <NextLink href="/lesson/12" passHref legacyBehavior><ListItemButton component="a"><Typography textColor="text.tertiary">12</Typography>Advanced nodes - Translating node</ListItemButton></NextLink>
                                 </ListItem>
                                 <ListItem>
-                                    <NextLink href="/lesson/13" passHref legacyBehavior><ListItemButton component="a"><Typography textColor="text.tertiary">13</Typography>Advanced nodes - Translating node</ListItemButton></NextLink>
-                                </ListItem>
-                                <ListItem>
-                                    <NextLink href="/lesson/14" passHref legacyBehavior><ListItemButton component="a"><Typography textColor="text.tertiary">14</Typography>Advanced nodes - Arc translating node</ListItemButton></NextLink>
+                                    <NextLink href="/lesson/13" passHref legacyBehavior><ListItemButton component="a"><Typography textColor="text.tertiary">13</Typography>Advanced nodes - Arc translating node</ListItemButton></NextLink>
                                 </ListItem>
                             </List>
                         </AccordionDetails>
@@ -137,7 +134,7 @@ export default function Learn() {
                                 }}
                             >
                                 <ListItem>
-                                    <NextLink href="/lesson/15" passHref legacyBehavior><ListItemButton component="a"><Typography textColor="text.tertiary">15</Typography>Does not exist</ListItemButton></NextLink>
+                                    <NextLink href="/lesson/14" passHref legacyBehavior><ListItemButton component="a"><Typography textColor="text.tertiary">14</Typography>Does not exist</ListItemButton></NextLink>
                                 </ListItem>
                             </List>
                         </AccordionDetails>
