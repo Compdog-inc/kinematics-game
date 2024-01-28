@@ -41,3 +41,22 @@ export const lessonMap = new Map<string, LessonSave>([
     ["12", translatingnode as LessonSave],
     ["13", arcnode as LessonSave]
 ]);
+
+export const lessonTopicSizes = [6, 5, 2, 1];
+
+export const lessonTopicStarts = new Map<number, { ref: number, id: number }>([
+    [0, { ref: 0, id: 0 }],
+    [1, { ref: 0, id: 0 }],
+    [2, { ref: 0, id: 0 }],
+    [3, { ref: 0, id: 0 }],
+    [4, { ref: 0, id: 0 }],
+    [5, { ref: 0, id: 0 }],
+    [6, { ref: 6, id: 1 }],
+    [7, { ref: 6, id: 1 }],
+    [8, { ref: 6, id: 1 }],
+    [9, { ref: 6, id: 1 }],
+    [10, { ref: 6, id: 1 }],
+    [11, { ref: 11, id: 2 }],
+    [12, { ref: 11, id: 2 }],
+    [13, { ref: 12, id: 3 }]
+]);

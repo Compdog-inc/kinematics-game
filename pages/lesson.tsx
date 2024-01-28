@@ -3,7 +3,7 @@ import Card from "@mui/joy/Card";
 import Typography from "@mui/joy/Typography";
 import Head from "next/head";
 import React, { useEffect } from "react";
-import { Lesson, LessonImageType, LessonPage } from "../utils/lesson";
+import { Lesson, LessonImageType, LessonPage, getLessonsCompletedFlag, setLessonCompleted, setLessonProgress } from "../utils/lesson";
 import Skeleton from "@mui/joy/Skeleton";
 import AspectRatio from "@mui/joy/AspectRatio";
 import Image from "next/image";
@@ -16,6 +16,7 @@ import { useRouter } from "next/router";
 import Cookies from "js-cookie";
 import styles from '../styles/lesson.module.css';
 import { toSimulationUrl } from "../utils/serializer";
+import { lessonTopicStarts } from "../utils/lesson_saves";
 
 export default function Lesson() {
     const [lesson, setLesson] = React.useState(null as Lesson | null);
@@ -136,7 +137,7 @@ export default function Lesson() {
                             }}>
                                 <Skeleton loading={lesson == null}>
                                     {lesson != null ?
-                                        <Image alt="" src={lesson.cover} placeholder="blur" blurDataURL={lesson.coverBlur} fill /> :
+                                        <Image alt="" src={lesson.cover} placeholder="blur" blurDataURL={lesson.coverBlur} fill sizes="(min-width: 1200px) 300px, (min-width: 900px) 200px, 0px" /> :
                                         null}
                                 </Skeleton>
                             </AspectRatio>
@@ -183,9 +184,9 @@ export default function Lesson() {
                                 }}>
                                     <Skeleton loading={cachedPage == null}>
                                         {(cachedPage != null && cachedPage.imageType === LessonImageType.Image) ?
-                                            <Image alt="" src={cachedPage.imageSrc} placeholder="empty" fill /> :
+                                            <Image alt="" src={cachedPage.imageSrc} placeholder="empty" fill sizes="200px" /> :
                                             (cachedPage != null && cachedPage.imageType === LessonImageType.Svg) ?
-                                                <Image alt="" src={cachedPage.imageSrc} placeholder="empty" fill className={styles.svgImg} /> :
+                                                <Image alt="" src={cachedPage.imageSrc} placeholder="empty" fill sizes="200px" className={styles.svgImg} /> :
                                                 (cachedPage != null && cachedPage?.imageType === LessonImageType.Widget) ?
                                                     <Gamewidget className={styles.widget} stref={(o) => widget.current = o} /> :
                                                     null
@@ -221,6 +222,15 @@ export default function Lesson() {
                                     setPage(page + 1);
                                     setJsPage(null);
                                 } else if (lesson != null) {
+                                    const id = Number(lessonId.current) - 1;
+                                    const topicId = lessonTopicStarts.get(id);
+                                    if (typeof (topicId) !== 'undefined') {
+                                        setLessonCompleted(topicId.id, id - topicId.ref, true);
+                                        const lsns = getLessonsCompletedFlag(topicId.id);
+                                        if (typeof (lsns) !== 'undefined' && lsns.length > 0) {
+                                            setLessonProgress(topicId.id, lsns.filter(n => n).length / lsns.length * 100);
+                                        }
+                                    }
                                     router.push("/learn");
                                 }
                             }}>
