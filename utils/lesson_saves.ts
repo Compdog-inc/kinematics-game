@@ -8,6 +8,7 @@ import vertex from "../lessons/vertex.json";
 import hypo from "../lessons/hypo.json";
 import stacking from "../lessons/stacking.json";
 import solvingkinematics from "../lessons/solvingkinematics.json";
+import translatingnode from "../lessons/translatingnode.json";
 
 export interface LessonSave {
     name: string;
@@ -35,5 +36,6 @@ export const lessonMap = new Map<string, LessonSave>([
     ["8", vertex as LessonSave],
     ["9", hypo as LessonSave],
     ["10", stacking as LessonSave],
-    ["11", solvingkinematics as LessonSave]
+    ["11", solvingkinematics as LessonSave],
+    ["12", translatingnode as LessonSave]
 ]);

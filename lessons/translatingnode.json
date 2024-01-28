@@ -1,0 +1,15 @@
+{
+    "name": "Advanced nodes - Translating node",
+    "description": "This tutorial will help you learn how to solve kinematics problems with translating and clamped translating nodes.",
+    "cover": "/images/lesson/1/cover.webp",
+    "coverBlur": "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=",
+    "time": 60000,
+    "pages": [
+        {
+            "textBefore": "Translating nodes are typically going to be defined using a linear function y = mx + b and the distance along the line from the origin.",
+            "imageType": "widget",
+            "imageSrc": "_x-LCAAAAAAAAApjmjUTBHbuZwCDH_YwGibOBBFg-L9pdeLLo7tYD0yx5NhhmsnvABVnYDprXZ82b8Ez-zNQmgEZNLgdgDHR1QEA2ajHl3sAAAA%3D",
+            "textAfter": "In this example, the slope is 1, the y-intercept is 0 and the distance along the line is 1. In order to get the coordinates of the point, imagine that the line is the hypotenuse of a right triangle. The angle of a line is equal to the inverse tangent of the slope so the coordiantes are (l*cos(tan⁻¹(m)), l*sin(tan⁻¹(m)) + b) where l is the distance along the line, m is the slope and b is the y-intercept. Using the values given in the example, the point is at (1*cos(tan⁻¹(1)), 1*sin(tan⁻¹(1)) + 0) = (cos45°, sin45°) = (√2/2, √2/2)"
+        }
+    ]
+}
