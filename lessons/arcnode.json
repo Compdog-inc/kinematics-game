@@ -1,0 +1,15 @@
+{
+    "name": "Advanced nodes - Arc translating node",
+    "description": "This tutorial will help you learn how to solve kinematics problems with arc translating nodes.",
+    "cover": "/images/lesson/1/cover.webp",
+    "coverBlur": "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=",
+    "time": 60000,
+    "pages": [
+        {
+            "textBefore": "Arc translating nodes are typically going to be defined using a center point, radius, minimum angle, maximum angle and percentage that the node is between the angles.",
+            "imageType": "widget",
+            "imageSrc": "_x-LCAAAAAAAAApjYgCDD_tnzQSBj_YwGibOCGEwsDKggA_2DHgBVL7B7QCUdoCIP7AHAD2ABOZyAAAA",
+            "textAfter": "In this example, the center is at the origin and the radius is 1. The minimum angle is 45° and the maximum angle is 135° and the node is halfway between the two angles. First it is necessary to get the angle of the node using linear interpolation, since when the percentage is 0% the node is directly at the minimum angle and when it is 100% the node is directly at the maximum angle, the angle of the node is a * (1 - t) + b * t where a is the minimum angle, b is the maximum angle and t is the percentage. If the node is halfway, the percentage is 50% or 0.5 so the angle is 45° * (1 - 0.5) + 135° * 0.5 = 22.5° + 67.5° = 90°. After finding the angle of the node, get the position using (r*cosΘ + x, r*sinΘ + y) where x and y is the center point. In this example, the radius is 1 and the center is (0,0) so the position is (cos90°, sin90°) = (0, 1)."
+        }
+    ]
+}
