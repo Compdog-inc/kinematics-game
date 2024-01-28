@@ -19,7 +19,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             const lesson: LessonPage = {
                 textBefore: save.pages[pagenum].textBefore,
                 textAfter: save.pages[pagenum].textAfter,
-                imageType: save.pages[pagenum].imageType === 'image' ? LessonImageType.Image : save.pages[pagenum].imageType === 'svg' ? LessonImageType.Svg : LessonImageType.Widget,
+                imageType: save.pages[pagenum].imageType === 'image' ? LessonImageType.Image : save.pages[pagenum].imageType === 'svg' ? LessonImageType.Svg : save.pages[pagenum].imageType === 'widget' ? LessonImageType.Widget : LessonImageType.None,
                 imageSrc: save.pages[pagenum].imageSrc
             };
             res.status(200).json(lesson);

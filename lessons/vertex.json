@@ -1,0 +1,25 @@
+{
+    "name": "Trigonometry - Right triangle vertex from an angle",
+    "description": "This tutorial will help you learn how to get the coordinates of a triangle vertex from its angle.",
+    "cover": "/images/lesson/1/cover.webp",
+    "coverBlur": "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=",
+    "time": 120000,
+    "pages": [
+        {
+            "textBefore": "This is a right triangle",
+            "imageType": "svg",
+            "imageSrc": "/images/lesson/8/right_triangle.svg",
+            "textAfter": "If the hypotenuse (r) is equal to 1, then x is cosΘ and y is sinΘ. This means that the coordinates of the top vertex are (x, y) or (cosΘ, sinΘ)."
+        },
+        {
+            "textBefore": "For example, if the angle is 30°, then the vertex is at (√3/2, 1/2) and if the angle is 45°, the vertex is at (√2/2, √2/2).",
+            "textAfter": "In kinematics, in order to get the position of the child node, build a right triangle using the angle of the link and get the vertex."
+        },
+        {
+            "textBefore": "In this example, the angle is 45° and the position of the parent node is at the origin (0, 0).",
+            "imageType": "widget",
+            "imageSrc": "_x-LCAAAAAAAAApjmjUTBD7uh9L2aPR-VgYGBkYQPmtdnzZvwTP7M1AaJIgM_svMft92PojxwJ-8H4Fzsz_sJyzhdSZKY0Ey44ELHxbvctl_Ey7BxIAFMEIxBli330LSpc4emxQIoLsb5iEAaD1I2_oAAAA%3D",
+            "textAfter": "To get the position of the child node, just add the position of the parent node to (cos(45°), sin(45°)). The position of the child node is (√2/2, √2/2)"
+        }
+    ]
+}

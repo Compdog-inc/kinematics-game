@@ -4,6 +4,7 @@ import styles from '../styles/gamewidget.module.css';
 import React, { useEffect } from "react";
 import { useColorScheme } from "@mui/joy/styles";
 import { closestDeltaOnSegment, maximizeAngle, normalizeAngle, distanceToSegmentSquared, segmentFromPointAngle } from "../utils/algebra";
+import classNames from "classnames";
 
 export class GameWidgetNode {
     id: number;
@@ -733,12 +734,13 @@ const solveInverseKinematics = (state: HTMLGameWidget, node: GameWidgetNode): Ga
     }
 };
 
-export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect, onNodeSelectionClear, onOpError }: {
+export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect, onNodeSelectionClear, onOpError, className }: {
     drag?: boolean,
     stref?: (o: HTMLGameWidget | null) => any | undefined,
     onNodeSelect?: () => void,
     onNodeSelectionClear?: () => void,
-    onOpError?: (err: string) => void
+    onOpError?: (err: string) => void,
+    className?: string
 }, ref: React.ForwardedRef<HTMLCanvasElement>) {
     const canvasElem = React.useRef(null as HTMLCanvasElement | null);
     const hadSelection = React.useRef(false);
@@ -778,8 +780,12 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
         }
     });
 
+    if (typeof (window) !== 'undefined') {
+        (window as any)['__SANDBOX_STATE'] = state.current;
+    }
+
     const render = React.useCallback(() => {
-        if (state.current.ctx) {
+        if (state.current.ctx && state.current.ctx.canvas.width > 0 && state.current.ctx.canvas.height > 0) {
             const ctx = state.current.ctx;
 
             const aspectBounds = (state.current.bounds.right - state.current.bounds.left) /
@@ -2269,7 +2275,7 @@ export default React.forwardRef(function GameWidget({ drag, stref, onNodeSelect,
     }, [stref]);
 
     return (
-        <Box className={styles.container}>
+        <Box className={classNames(className, styles.container)}>
             <canvas ref={r => {
                 if (typeof ref === "function") ref(r); else if (ref !== null) ref.current = r;
                 canvasElem.current = r;

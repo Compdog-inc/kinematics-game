@@ -11,9 +11,11 @@ import CardOverflow from "@mui/joy/CardOverflow";
 import CardContent from "@mui/joy/CardContent";
 import humanizeDuration from "humanize-duration";
 import Button from "@mui/joy/Button";
-import Gamewidget from "../components/gamewidget";
+import Gamewidget, { HTMLGameWidget } from "../components/gamewidget";
 import { useRouter } from "next/router";
 import Cookies from "js-cookie";
+import styles from '../styles/lesson.module.css';
+import { toSimulationUrl } from "../utils/serializer";
 
 export default function Lesson() {
     const [lesson, setLesson] = React.useState(null as Lesson | null);
@@ -23,6 +25,8 @@ export default function Lesson() {
 
     const lessonId = React.useRef(null as string | null);
     const pageCache = React.useRef(new Map<number, LessonPage>());
+
+    const widget = React.useRef(null as HTMLGameWidget | null);
 
     useEffect(() => {
         const url = new URL(location.href);
@@ -67,6 +71,16 @@ export default function Lesson() {
         }
     }, [page]);
 
+    useEffect(() => {
+        if (widget.current && jsPage && jsPage.imageType === LessonImageType.Widget) {
+            const encoded = decodeURIComponent(jsPage.imageSrc);
+            toSimulationUrl(encoded, widget.current).then(() => {
+                if (widget.current && widget.current.render)
+                    requestAnimationFrame(widget.current.render);
+            });
+        }
+    }, [jsPage]);
+
     let cachedPage = jsPage;
     if (pageCache.current.has(page)) {
         cachedPage = pageCache.current.get(page) as LessonPage;
@@ -75,7 +89,7 @@ export default function Lesson() {
     return (
         <>
             <Head>
-                <title>Pixel Perfect Kinematics | Lesson</title>
+                <title>{"Pixel Perfect Kinematics | " + ((lesson && lesson != null) ? lesson.name : 'Lesson')}</title>
             </Head>
             <Box display="flex" justifyContent="center" height="calc(100vh - 60px)" sx={{
                 pt: {
@@ -162,19 +176,22 @@ export default function Lesson() {
                                     {cachedPage == null ? "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Eget felis eget nunc lobortis." : cachedPage.textBefore}
                                 </Skeleton>
                             </Typography>
-                            <AspectRatio ratio="1" sx={{
-                                width: '200px',
-                                m: 3
-                            }}>
-                                <Skeleton loading={cachedPage == null}>
-                                    {(cachedPage != null && cachedPage.imageType === LessonImageType.Image) ?
-                                        <Image alt="" src={cachedPage.imageSrc} placeholder="empty" fill /> :
-                                        (cachedPage != null && cachedPage.imageType === LessonImageType.Svg) ?
+                            {cachedPage == null || cachedPage.imageType !== LessonImageType.None ?
+                                <AspectRatio ratio="1" sx={{
+                                    width: '200px',
+                                    m: 3
+                                }}>
+                                    <Skeleton loading={cachedPage == null}>
+                                        {(cachedPage != null && cachedPage.imageType === LessonImageType.Image) ?
                                             <Image alt="" src={cachedPage.imageSrc} placeholder="empty" fill /> :
-                                            <Gamewidget />
-                                    }
-                                </Skeleton>
-                            </AspectRatio>
+                                            (cachedPage != null && cachedPage.imageType === LessonImageType.Svg) ?
+                                                <Image alt="" src={cachedPage.imageSrc} placeholder="empty" fill className={styles.svgImg} /> :
+                                                (cachedPage != null && cachedPage?.imageType === LessonImageType.Widget) ?
+                                                    <Gamewidget className={styles.widget} stref={(o) => widget.current = o} /> :
+                                                    null
+                                        }
+                                    </Skeleton>
+                                </AspectRatio> : null}
                             {(cachedPage == null || cachedPage?.textAfter) ?
                                 <Typography level="body-lg" mb={1}>
                                     <Skeleton loading={cachedPage == null}>

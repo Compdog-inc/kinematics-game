@@ -14,13 +14,20 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     const id = req.query.id;
     const incrView = typeof (req.query.incrview) !== 'undefined';
     if (typeof (id) === 'string') {
-        if (!lessonMap.has(id))
-            return res.status(404).end();
+        if (!lessonMap.has(id)) {
+            res.status(404).end();
+            return;
+        }
 
         const save = lessonMap.get(id) as LessonSave;
 
-        const key = 'lesson-views-' + id;
-        const viewCount = incrView ? (await kv.incr(key)) : toInt(await kv.get(key));
+        let viewCount;
+        try {
+            const key = 'lesson-views-' + id;
+            viewCount = incrView ? (await kv.incr(key)) : toInt(await kv.get(key));
+        } catch {
+            viewCount = 0;
+        }
 
         const lesson: Lesson = {
             name: save.name,
@@ -34,5 +41,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         res.status(200).json(lesson);
     } else {
         res.status(400).end();
+        return;
     }
 };

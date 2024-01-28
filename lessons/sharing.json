@@ -1,0 +1,15 @@
+{
+    "name": "How to use the sandbox - Sharing",
+    "description": "This tutorial will show how to share your creation in the sandbox using a url that other people can open.",
+    "cover": "/images/lesson/1/cover.webp",
+    "coverBlur": "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=",
+    "time": 30000,
+    "pages": [
+        {
+            "textBefore": "To share a simulation, press the share button in the top right corner and copy the url.",
+            "imageType": "image",
+            "imageSrc": "/images/lesson/5/share.webp",
+            "textAfter": "In the image, the circled button is the share button and the arrow points to the copy url button. Press it and paste the link elsewhere to share it with someone."
+        }
+    ]
+}

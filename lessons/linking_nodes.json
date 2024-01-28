@@ -1,0 +1,21 @@
+{
+    "name": "How to use the sandbox - Linking nodes",
+    "description": "This tutorial will demonstrate how to link nodes in the sandbox to create kinematics systems.",
+    "cover": "/images/lesson/1/cover.webp",
+    "coverBlur": "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=",
+    "time": 60000,
+    "pages": [
+        {
+            "textBefore": "The links are inside the node drawer. They are added in the same way as nodes. However, when using add-on-click mode, if the click is over a node, the link connects to it and sets the end point on the second click. This way it is possible to quickly connect two nodes by using add-on-click and clicking on the nodes.",
+            "imageType": "image",
+            "imageSrc": "/images/lesson/3/linkdrawer.webp",
+            "textAfter": "This image shows the link option in the node drawer."
+        },
+        {
+            "textBefore": "Since a link connects two points, to move them click and drag the edge of the link closest to the end point. If the end point is near a node, it snaps and connects to it. To disconnect a link, click and drag that edge away from the node.",
+            "imageType": "image",
+            "imageSrc": "/images/lesson/3/draglink.webp",
+            "textAfter": "In this image, the lower point of the link is being dragged and is connecting to the clamped translating node. The number on the link is its length."
+        }
+    ]
+}

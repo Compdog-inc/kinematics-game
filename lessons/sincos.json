@@ -1,0 +1,15 @@
+{
+    "name": "Sine and Cosine values on the unit circle",
+    "description": "This tutorial will help you learn the values of Sine and Cosine on the unit circle.",
+    "cover": "/images/lesson/1/cover.webp",
+    "coverBlur": "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=",
+    "time": 60000,
+    "pages": [
+        {
+            "textBefore": "In trigonometry, the unit circle is the circle of radius 1 centered at the origin. The coordinates of a point at an angle are (cosΘ, sinΘ)",
+            "imageType": "svg",
+            "imageSrc": "/images/lesson/7/Unit_circle_angles_color.svg",
+            "textAfter": "This image shows the exact coordinates of some angles on the unit circle. It is helpful to remember these in order to solve kinematics problems faster."
+        }
+    ]
+}
